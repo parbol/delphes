@@ -9,6 +9,7 @@
 #######################################
 # Order of execution of various modules
 #######################################
+set MaxEvents 1000 
 
 set ExecutionPath {
 
@@ -18,7 +19,10 @@ set ExecutionPath {
   DenseMergeTracks
   DenseFilter
   DenseMergeTracksNeutrals
-
+  
+  ParticlePropagatorTiming
+  TimeSmearing
+  
   ParticlePropagator
 
   ChargedHadronTrackingEfficiency
@@ -232,11 +236,42 @@ module Merger DenseMergeTracksNeutrals {
 
 
 #################################
+# Dense Track propagation to timing detectors
+#################################
+module ParticlePropagator ParticlePropagatorTiming {
+  set InputArray DenseMergeTracksNeutrals/stableParticles
+  set OutputArray stableParticles
+
+  # radius of the magnetic field coverage, in m
+  set Radius 1.10
+  # half-length of the magnetic field coverage, in m
+  set HalfLength 2.8
+
+  # magnetic field
+  set Bz 3.8
+}
+
+
+#################################
+# Apply time smearing on the tracks
+#################################
+
+module TimeSmearing TimeSmearing {
+
+  set InputArray ParticlePropagatorTiming/stableParticles
+  set OutputArray stableParticles
+  
+  set TimeResolution 30E-12
+
+}
+
+
+#################################
 # Dense Track propagation calo
 #################################
 
 module ParticlePropagator ParticlePropagator {
-  set InputArray DenseMergeTracksNeutrals/stableParticles
+  set InputArray TimeSmearing/stableParticles
 
   set OutputArray stableParticles
   set NeutralOutputArray neutralParticles
@@ -252,6 +287,7 @@ module ParticlePropagator ParticlePropagator {
   # magnetic field
   set Bz 3.8
 }
+
 
 ####################################
 # Charged hadron tracking efficiency
@@ -2391,6 +2427,8 @@ module TreeWriter TreeWriter {
 # add Branch InputArray BranchName BranchClass
   add Branch GenParticleFilter/filteredParticles Particle GenParticle
   add Branch PileUpMerger/vertices Vertex Vertex
+
+  add Branch TimeSmearing/stableParticles ParticleTiming GenParticle
 
   add Branch GenJetFinder/jets GenJet Jet
   add Branch GenJetFinderAK8/jetsAK8 GenJetAK8 Jet
