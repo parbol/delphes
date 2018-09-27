@@ -56,6 +56,7 @@
 #include "modules/TrackPileUpSubtractor.h"
 #include "modules/TaggingParticlesSkimmer.h"
 #include "modules/PileUpJetID.h"
+#include "modules/PhotonID.h"
 #include "modules/ConstituentFilter.h"
 #include "modules/StatusPidFilter.h"
 #include "modules/PdgCodeFilter.h"
@@ -70,6 +71,9 @@
 #include "modules/VertexFinder.h"
 #include "modules/VertexFinderDA4D.h"
 #include "modules/ExampleModule.h"
+#include "modules/MA5GenParticleFilter.h"
+#include "modules/MA5EfficiencyD0.h"
+
 
 #ifdef __CINT__
 
@@ -108,6 +112,7 @@
 #pragma link C++ class TrackPileUpSubtractor+;
 #pragma link C++ class TaggingParticlesSkimmer+;
 #pragma link C++ class PileUpJetID+;
+#pragma link C++ class PhotonID+;
 #pragma link C++ class ConstituentFilter+;
 #pragma link C++ class StatusPidFilter+;
 #pragma link C++ class PdgCodeFilter+;
@@ -121,6 +126,8 @@
 #pragma link C++ class VertexSorter+;
 #pragma link C++ class VertexFinder+;
 #pragma link C++ class VertexFinderDA4D+;
+#pragma link C++ class MA5GenParticleFilter+;
+#pragma link C++ class MA5EfficiencyD0+;
 #pragma link C++ class ExampleModule+;
 
 #endif

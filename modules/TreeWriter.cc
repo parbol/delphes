@@ -462,7 +462,6 @@ void TreeWriter::ProcessPhotons(ExRootTreeBranch *branch, TObjArray *array)
     const TLorentzVector &momentum = candidate->Momentum;
     const TLorentzVector &position = candidate->Position;
 
-
     pt = momentum.Pt();
     cosTheta = TMath::Abs(momentum.CosTheta());
     signPz = (momentum.Pz() >= 0.0) ? 1.0 : -1.0;
@@ -475,7 +474,6 @@ void TreeWriter::ProcessPhotons(ExRootTreeBranch *branch, TObjArray *array)
     entry->Phi = momentum.Phi();
     entry->PT = pt;
     entry->E = momentum.E();
-
     entry->T = position.T()*1.0E-3/c_light;
 
     // Isolation variables
@@ -488,6 +486,9 @@ void TreeWriter::ProcessPhotons(ExRootTreeBranch *branch, TObjArray *array)
     entry->SumPt = candidate->SumPt ;
 
     entry->EhadOverEem = candidate->Eem > 0.0 ? candidate->Ehad/candidate->Eem : 999.9;
+
+    // 1: prompt -- 2: non prompt -- 3: fake
+    entry->Status = candidate->Status;
 
     FillParticles(candidate, &entry->Particles);
   }
@@ -535,6 +536,20 @@ void TreeWriter::ProcessElectrons(ExRootTreeBranch *branch, TObjArray *array)
     entry->SumPtChargedPU = candidate->SumPtChargedPU ;
     entry->SumPt = candidate->SumPt ;
 
+    entry->D0 = candidate->D0;
+    entry->D0error = candidate->ErrorD0;
+    entry->DZ = candidate->DZ;
+    entry->DZerror = candidate->ErrorDZ;
+    entry->Tp = candidate->InitialPosition.T();
+    entry->Xp = candidate->InitialPosition.X();
+    entry->Yp = candidate->InitialPosition.Y();
+    entry->Zp = candidate->InitialPosition.Z();
+    entry->Xd = candidate->Xd;
+    entry->Yd = candidate->Yd;
+    entry->Zd = candidate->Zd;
+
+
+
 
     entry->Charge = candidate->Charge;
 
@@ -571,9 +586,21 @@ void TreeWriter::ProcessMuons(ExRootTreeBranch *branch, TObjArray *array)
     rapidity = (cosTheta == 1.0 ? signPz*999.9 : momentum.Rapidity());
 
     entry = static_cast<Muon*>(branch->NewEntry());
-
     entry->SetBit(kIsReferenced);
     entry->SetUniqueID(candidate->GetUniqueID());
+    
+    entry->D0 = candidate->D0;
+    entry->D0error = candidate->ErrorD0;
+    entry->DZ = candidate->DZ;
+    entry->DZerror = candidate->ErrorDZ;
+    entry->Tp = candidate->InitialPosition.T();
+    entry->Xp = candidate->InitialPosition.X();
+    entry->Yp = candidate->InitialPosition.Y();
+    entry->Zp = candidate->InitialPosition.Z();
+    entry->Xd = candidate->Xd;
+    entry->Yd = candidate->Yd;
+    entry->Zd = candidate->Zd;
+
 
     entry->Eta = eta;
     entry->Phi = momentum.Phi();
@@ -589,6 +616,8 @@ void TreeWriter::ProcessMuons(ExRootTreeBranch *branch, TObjArray *array)
     entry->SumPtNeutral = candidate->SumPtNeutral ;
     entry->SumPtChargedPU = candidate->SumPtChargedPU ;
     entry->SumPt = candidate->SumPt ;
+
+
 
     entry->Charge = candidate->Charge;
 
@@ -650,6 +679,7 @@ void TreeWriter::ProcessJets(ExRootTreeBranch *branch, TObjArray *array)
     entry->BTagPhys = candidate->BTagPhys;
 
     entry->TauTag = candidate->TauTag;
+    entry->TauWeight = candidate->TauWeight;
 
     entry->Charge = candidate->Charge;
 
@@ -694,6 +724,13 @@ void TreeWriter::ProcessJets(ExRootTreeBranch *branch, TObjArray *array)
       entry->PrunedP4[i] = candidate -> PrunedP4[i];
       entry->SoftDroppedP4[i] = candidate -> SoftDroppedP4[i];
     }
+
+    //--- exclusive clustering variables ---
+    entry->ExclYmerge23 = candidate->ExclYmerge23;
+    entry->ExclYmerge34 = candidate->ExclYmerge34;
+    entry->ExclYmerge45 = candidate->ExclYmerge45;
+    entry->ExclYmerge56 = candidate->ExclYmerge56;    
+
 
     FillParticles(candidate, &entry->Particles);
   }

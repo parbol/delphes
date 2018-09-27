@@ -63,7 +63,7 @@ using namespace std;
 //---------------------------------------------------------------------------
 
 void ConvertInput(fwlite::Event &event, Long64_t eventCounter,
-  ExRootTreeBranch *branchEvent, ExRootTreeBranch *branchRwgt,
+  ExRootTreeBranch *branchEvent, ExRootTreeBranch *branchWeight,
   DelphesFactory *factory, TObjArray *allParticleOutputArray,
   TObjArray *stableParticleOutputArray, TObjArray *partonOutputArray, Bool_t firstEvent)
 {
@@ -152,7 +152,7 @@ void ConvertInput(fwlite::Event &event, Long64_t eventCounter,
 
     for(itWeightsInfo = vectorWeightsInfo.begin(); itWeightsInfo != vectorWeightsInfo.end(); ++itWeightsInfo)
     {
-      weight = static_cast<Weight *>(branchRwgt->NewEntry());
+      weight = static_cast<Weight *>(branchWeight->NewEntry());
       weight->Weight = itWeightsInfo->wgt;
     }
   }
@@ -291,7 +291,7 @@ int main(int argc, char *argv[])
   TFile *outputFile = 0;
   TStopwatch eventStopWatch;
   ExRootTreeWriter *treeWriter = 0;
-  ExRootTreeBranch *branchEvent = 0, *branchRwgt = 0;
+  ExRootTreeBranch *branchEvent = 0, *branchWeight = 0;
   ExRootConfReader *confReader = 0;
   Delphes *modularDelphes = 0;
   DelphesFactory *factory = 0;
@@ -306,8 +306,20 @@ int main(int argc, char *argv[])
     cout << " config_file - configuration file in Tcl format," << endl;
     cout << " output_file - output file in ROOT format," << endl;
     cout << " input_file(s) - input file(s) in ROOT format." << endl;
+    cout << " from_event - first event to process." << endl;
+    cout << " to_event - last event to process." << endl;
     return 1;
   }
+
+  Long64_t firstevent = atol(argv[3]);
+  Long64_t lastevent  = atol(argv[4]);
+
+  if(firstevent < 0 || lastevent < firstevent) {
+    cout << "The event numbers are not correct" << endl;
+    return 1;
+  }
+
+
 
   signal(SIGINT, SignalHandler);
 
@@ -332,7 +344,7 @@ int main(int argc, char *argv[])
     treeWriter = new ExRootTreeWriter(outputFile, "Delphes");
 
     branchEvent = treeWriter->NewBranch("Event", HepMCEvent::Class());
-    branchRwgt = treeWriter->NewBranch("Weight", Weight::Class());
+    branchWeight = treeWriter->NewBranch("Weight", Weight::Class());
 
     confReader = new ExRootConfReader;
     confReader->ReadFile(argv[1]);
@@ -348,7 +360,7 @@ int main(int argc, char *argv[])
 
     modularDelphes->InitTask();
 
-    for(i = 3; i < argc && !interrupted; ++i)
+    for(i = 5; i < argc && !interrupted; ++i)
     {
       cout << "** Reading " << argv[i] << endl;
 
@@ -376,7 +388,11 @@ int main(int argc, char *argv[])
 
       for(event.toBegin(); !event.atEnd() && !interrupted; ++event)
       {
-        ConvertInput(event, eventCounter, branchEvent, branchRwgt, factory,
+        if(eventCounter < firstevent || eventCounter > lastevent)  {
+           ++eventCounter;
+           continue;
+        }
+        ConvertInput(event, eventCounter, branchEvent, branchWeight, factory,
           allParticleOutputArray, stableParticleOutputArray, partonOutputArray, firstEvent);
         modularDelphes->ProcessTask();
 

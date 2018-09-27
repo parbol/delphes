@@ -124,7 +124,7 @@ Candidate::Candidate() :
   ClusterIndex(-1), ClusterNDF(0), ClusterSigma(0), SumPT2(0), BTVSumPT2(0), GenDeltaZ(0), GenSumPT2(0),
   Flavor(0), FlavorAlgo(0), FlavorPhys(0),
   BTag(0), BTagAlgo(0), BTagPhys(0),
-  TauTag(0), Eem(0.0), Ehad(0.0),
+  TauTag(0), TauWeight(0.0), Eem(0.0), Ehad(0.0),
   DeltaEta(0.0), DeltaPhi(0.0),
   Momentum(0.0, 0.0, 0.0, 0.0),
   Position(0.0, 0.0, 0.0, 0.0),
@@ -156,6 +156,10 @@ Candidate::Candidate() :
   NSubJetsTrimmed(0),
   NSubJetsPruned(0),
   NSubJetsSoftDropped(0),
+  ExclYmerge23(0),
+  ExclYmerge34(0),
+  ExclYmerge45(0),
+  ExclYmerge56(0),
   fFactory(0),
   fArray(0)
 {
@@ -275,6 +279,7 @@ void Candidate::Copy(TObject &obj) const
   object.BTagAlgo = BTagAlgo;
   object.BTagPhys = BTagPhys;
   object.TauTag = TauTag;
+  object.TauWeight = TauWeight;
   object.Eem = Eem;
   object.Ehad = Ehad;
   object.Edges[0] = Edges[0];
@@ -399,6 +404,7 @@ void Candidate::Clear(Option_t* option)
   BTagAlgo = 0;
   BTagPhys = 0;
   TauTag = 0;
+  TauWeight = 0.0;
   Eem = 0.0;
   Ehad = 0.0;
   Edges[0] = 0.0;

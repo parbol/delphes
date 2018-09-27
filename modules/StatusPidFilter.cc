@@ -120,6 +120,17 @@ namespace {
     return false;
   }
 
+  bool isWDaughter(int M1, const TObjArray *fInputArray)
+  {
+     if ( M1 < 0 ) return false;
+
+     Candidate *mother;
+     mother = static_cast<Candidate*>(fInputArray->At( M1 ));
+     if ( TMath::Abs(mother->PID) == 24 ) return true;
+
+     return false;
+  }
+
 }
 
 
@@ -176,6 +187,9 @@ void StatusPidFilter::Process()
 
     pass = kFALSE;
 
+    // Store all SUSY particles
+    if(pdgCode >= 1000001 && pdgCode <= 1000039) pass = kTRUE;
+
     // hard scattering particles (first condition for Py6, second for Py8)
     if(status == 3) pass = kTRUE;
     if(status > 20 && status < 30 ) pass = kTRUE;
@@ -189,6 +203,9 @@ void StatusPidFilter::Process()
     // Gauge bosons and other fundamental bosons
     if(pdgCode > 22 && pdgCode < 43) pass = kTRUE;
 
+    //Stable photons 
+    if(pdgCode == 22 && status==1) pass = kTRUE;
+
     // logic ported from HepPDF: http://lcgapp.cern.ch/project/simu/HepPDT/HepPDT.2.05.02/html/ParticleID_8cc-source.html#l00081
     bool is_b_hadron = hasBottom(pdgCode);
     bool is_b_quark  = (pdgCode == 5);
@@ -201,9 +218,13 @@ void StatusPidFilter::Process()
     if (is_tau_daughter)
       pass = kTRUE;
 
+    bool is_W_daughter = isWDaughter(candidate->M1, fInputArray);
+    if (is_W_daughter) 
+      pass = kTRUE;
+
     // fPTMin not applied to b_hadrons / b_quarks to allow for b-enriched sample stitching
     // fPTMin not applied to tau decay products to allow visible-tau four momentum determination
-    if(!pass || (candidate->Momentum.Pt() < fPTMin && !(is_b_hadron || is_b_quark || is_tau_daughter)) ) continue;
+    if(!pass || (candidate->Momentum.Pt() < fPTMin && !(is_b_hadron || is_b_quark || is_tau_daughter || is_W_daughter)) ) continue;
 
     fOutputArray->Add(candidate);
   }

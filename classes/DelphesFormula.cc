@@ -59,8 +59,9 @@ Int_t DelphesFormula::Compile(const char *expression)
   buffer.ReplaceAll("pt", "x");
   buffer.ReplaceAll("eta", "y");
   buffer.ReplaceAll("phi", "z");
+  buffer.ReplaceAll("dz",  "z");
   buffer.ReplaceAll("energy", "t");
-
+  buffer.ReplaceAll("d0",     "t");
 
 
   #if ROOT_VERSION_CODE < ROOT_VERSION(6,0,0)

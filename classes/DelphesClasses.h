@@ -274,6 +274,8 @@ public:
   Float_t SumPtChargedPU; // isolation variable
   Float_t SumPt; // isolation variable
 
+  Int_t Status; // 1: prompt -- 2: non prompt -- 3: fake
+
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
 
@@ -293,6 +295,17 @@ public:
   Float_t Phi; // electron azimuthal angle
 
   Float_t T; // particle arrival time of flight
+  Float_t D0;
+  Float_t D0error;
+  Float_t DZ;
+  Float_t DZerror;
+  Float_t Tp;
+  Float_t Xp;
+  Float_t Yp;
+  Float_t Zp;
+  Float_t Xd;
+  Float_t Yd;
+  Float_t Zd;
 
   Int_t Charge; // electron charge
 
@@ -326,6 +339,17 @@ public:
   Float_t Phi; // muon azimuthal angle
 
   Float_t T; // particle arrival time of flight
+  Float_t D0;
+  Float_t D0error;
+  Float_t DZ;
+  Float_t DZerror;
+  Float_t Tp;
+  Float_t Xp;
+  Float_t Yp;
+  Float_t Zp;
+  Float_t Xd;
+  Float_t Yd;
+  Float_t Zd;
 
   Int_t Charge; // muon charge
 
@@ -372,6 +396,7 @@ public:
   UInt_t BTagPhys; // 0 or 1 for a jet that has been tagged as containing a heavy quark
 
   UInt_t TauTag; // 0 or 1 for a jet that has been tagged as a tau
+  Float_t TauWeight; // probability for jet to be identified as tau
 
   Int_t Charge; // tau charge
 
@@ -395,10 +420,16 @@ public:
   TLorentzVector PrunedP4[5]; // first entry (i = 0) is the total Pruned Jet 4-momenta and from i = 1 to 4 are the pruned subjets 4-momenta
   TLorentzVector SoftDroppedP4[5]; // first entry (i = 0) is the total SoftDropped Jet 4-momenta and from i = 1 to 4 are the pruned subjets 4-momenta
 
+
   Int_t NSubJetsTrimmed; // number of subjets trimmed
   Int_t NSubJetsPruned; // number of subjets pruned
   Int_t NSubJetsSoftDropped; // number of subjets soft-dropped
 
+  Double_t ExclYmerge23;
+  Double_t ExclYmerge34;
+  Double_t ExclYmerge45;
+  Double_t ExclYmerge56;
+  
   TRefArray Constituents; // references to constituents
   TRefArray Particles; // references to generated particles
 
@@ -543,7 +574,6 @@ public:
   Int_t IsRecoPU;
 
   Int_t IsConstituent;
-
   Int_t IsFromConversion;
 
   UInt_t Flavor;
@@ -555,6 +585,7 @@ public:
   UInt_t BTagPhys;
 
   UInt_t TauTag;
+  Float_t TauWeight;
 
   Float_t Eem;
   Float_t Ehad;
@@ -640,7 +671,12 @@ public:
   Int_t NSubJetsPruned; // number of subjets pruned
   Int_t NSubJetsSoftDropped; // number of subjets soft-dropped
 
-
+  // Exclusive clustering variables
+  Double_t ExclYmerge23;
+  Double_t ExclYmerge34;
+  Double_t ExclYmerge45;
+  Double_t ExclYmerge56;
+      
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
 
