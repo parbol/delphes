@@ -300,12 +300,23 @@ int main(int argc, char *argv[])
   Long64_t eventCounter, numberOfEvents;
   Bool_t firstEvent = kTRUE;
 
-  if(argc < 4)
+  if(argc < 6)
   {
-    cout << " Usage: " << appName << " config_file" << " output_file" << " input_file(s)" << endl;
+    cout << " Usage: " << appName << " config_file" << " output_file" << " from_event to_event input_file(s)" << endl;
     cout << " config_file - configuration file in Tcl format," << endl;
     cout << " output_file - output file in ROOT format," << endl;
     cout << " input_file(s) - input file(s) in ROOT format." << endl;
+    cout << " from_event - first event to process." << endl;
+    cout << " to_event - last event to process." << endl;
+    return 1;
+  }
+
+
+  Long64_t firstevent = atol(argv[3]);
+  Long64_t lastevent  = atol(argv[4]);
+
+  if(firstevent < 0 || lastevent < firstevent) {
+    cout << "The event numbers are not correct" << endl;
     return 1;
   }
 
@@ -348,7 +359,7 @@ int main(int argc, char *argv[])
 
     modularDelphes->InitTask();
 
-    for(i = 3; i < argc && !interrupted; ++i)
+    for(i = 5; i < argc && !interrupted; ++i)
     {
       cout << "** Reading " << argv[i] << endl;
 
@@ -373,9 +384,13 @@ int main(int argc, char *argv[])
       eventCounter = 0;
       modularDelphes->Clear();
       treeWriter->Clear();
-
+      
       for(event.toBegin(); !event.atEnd() && !interrupted; ++event)
       {
+        if(eventCounter < firstevent || eventCounter > lastevent)  {
+           ++eventCounter;
+           continue;
+        }
         ConvertInput(event, eventCounter, branchEvent, branchWeight, factory,
           allParticleOutputArray, stableParticleOutputArray, partonOutputArray, firstEvent);
         modularDelphes->ProcessTask();

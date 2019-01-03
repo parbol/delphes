@@ -167,6 +167,12 @@ public:
   Float_t Y; // particle vertex position (y component) | hepevt.vhep[number][1]
   Float_t Z; // particle vertex position (z component) | hepevt.vhep[number][2]
 
+  Float_t TOuter; // track position (t component) at the tracker edge
+  Float_t XOuter; // track position (x component) at the tracker edge
+  Float_t YOuter; // track position (y component) at the tracker edge
+  Float_t ZOuter; // track position (z component) at the tracker edge
+
+
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
 
@@ -266,7 +272,17 @@ public:
 
   Float_t E; // photon energy
 
-  Float_t T; // particle arrival time of flight
+  //Added by Pablo
+  Float_t X; //particle origin time of flight
+  Float_t Y; //particle origin time of flight
+  Float_t Z; //particle origin time of flight
+  Float_t T; //particle origin time of flight
+  Float_t XOuter; //particle arrival time of flight
+  Float_t YOuter; //particle arrival time of flight
+  Float_t ZOuter; //particle arrival time of flight
+  Float_t TOuter; //particle arrival time of flight
+
+ 
 
   Float_t EhadOverEem; // ratio of the hadronic versus electromagnetic energy deposited in the calorimeter
 
@@ -299,8 +315,18 @@ public:
   Float_t Eta; // electron pseudorapidity
   Float_t Phi; // electron azimuthal angle
 
-  Float_t T; // particle arrival time of flight
+  //Added by Pablo
+  Float_t X; //particle origin time of flight
+  Float_t Y; //particle origin time of flight
+  Float_t Z; //particle origin time of flight
+  Float_t T; //particle origin time of flight
+  Float_t XOuter; //particle arrival time of flight
+  Float_t YOuter; //particle arrival time of flight
+  Float_t ZOuter; //particle arrival time of flight
+  Float_t TOuter; //particle arrival time of flight
 
+
+ 
   Int_t Charge; // electron charge
 
   Float_t EhadOverEem; // ratio of the hadronic versus electromagnetic energy deposited in the calorimeter
@@ -332,7 +358,16 @@ public:
   Float_t Eta; // muon pseudorapidity
   Float_t Phi; // muon azimuthal angle
 
-  Float_t T; // particle arrival time of flight
+  //Added by Pablo
+  Float_t X; //particle origin time of flight
+  Float_t Y; //particle origin time of flight
+  Float_t Z; //particle origin time of flight
+  Float_t T; //particle origin time of flight
+  Float_t XOuter; //particle arrival time of flight
+  Float_t YOuter; //particle arrival time of flight
+  Float_t ZOuter; //particle arrival time of flight
+  Float_t TOuter; //particle arrival time of flight
+
 
   Int_t Charge; // muon charge
 
@@ -362,8 +397,16 @@ public:
   Float_t PT; // jet transverse momentum
   Float_t Eta; // jet pseudorapidity
   Float_t Phi; // jet azimuthal angle
-
-  Float_t T; //particle arrival time of flight
+  
+  //Added by Pablo
+  Float_t X; //particle origin time of flight
+  Float_t Y; //particle origin time of flight
+  Float_t Z; //particle origin time of flight
+  Float_t T; //particle origin time of flight
+  Float_t XOuter; //particle arrival time of flight
+  Float_t YOuter; //particle arrival time of flight
+  Float_t ZOuter; //particle arrival time of flight
+  Float_t TOuter; //particle arrival time of flight
 
   Float_t Mass; // jet invariant mass
 

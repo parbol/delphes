@@ -150,6 +150,10 @@ void ParticlePropagator::Process()
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
   {
+    
+    //#################Modified by Pablo############################
+    //#This was overwriting the effect of the Time Smearing module.# 
+    //##############################################################
     if(candidate->GetCandidates()->GetEntriesFast() == 0)
     {
       particle = candidate;
@@ -158,9 +162,14 @@ void ParticlePropagator::Process()
     {
       particle = static_cast<Candidate*>(candidate->GetCandidates()->At(0));
     }
+    //##############################################################
+
+    //particle = candidate;
 
     particlePosition = particle->Position;
     particleMomentum = particle->Momentum;
+
+
     x = particlePosition.X()*1.0E-3;
     y = particlePosition.Y()*1.0E-3;
     z = particlePosition.Z()*1.0E-3;

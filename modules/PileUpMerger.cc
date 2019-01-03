@@ -72,6 +72,8 @@ void PileUpMerger::Init()
 {
   const char *fileName;
 
+  fTimeResolution = GetDouble("TimeResolution", 1.0E-10);
+
   fPileUpDistribution = GetInt("PileUpDistribution", 0);
 
   fMeanPileUp  = GetDouble("MeanPileUp", 10);
@@ -115,7 +117,7 @@ void PileUpMerger::Process()
   TDatabasePDG *pdg = TDatabasePDG::Instance();
   TParticlePDG *pdgParticle;
   Int_t pid, nch, nvtx = -1;
-  Float_t x, y, z, t, vx, vy;
+  Float_t x, y, z, t, vx, vy, vt;
   Float_t px, py, pz, e, pt;
   Double_t dz, dphi, dt, sumpt2, dz0, dt0;
   Int_t numberOfEvents, event, numberOfParticles;
@@ -137,10 +139,9 @@ void PileUpMerger::Process()
   dt *= c_light*1.0E3; // necessary in order to make t in mm/c
   dz *= 1.0E3; // necessary in order to make z in mm
 
-  //cout<<dz<<","<<dt<<endl;
-
   vx = 0.0;
   vy = 0.0;
+  vt = 0.0;
 
   numberOfParticles = fInputArray->GetEntriesFast();
   nch = 0;
@@ -149,6 +150,7 @@ void PileUpMerger::Process()
   factory = GetFactory();
   vertex = factory->NewCandidate();
 
+
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
   {
     vx += candidate->Position.X();
@@ -156,37 +158,49 @@ void PileUpMerger::Process()
     z = candidate->Position.Z();
     t = candidate->Position.T();
     pt = candidate->Momentum.Pt();
+  
 
-    // take postion and time from first stable particle
-    if (dz0 < -999999.0)
-      dz0 = z;
-    if (dt0 < -999999.0)
-      dt0 = t;
-
-    // cancel any possible offset in position and time the input file
-    candidate->Position.SetZ(z - dz0 + dz);
-    candidate->Position.SetT(t - dt0 + dt);
-
+    //===========================Original===============================
+    //if (dz0 < -999999.0)
+    //  dz0 = z;
+    //if (dt0 < -999999.0)
+    //  dt0 = t;
+    //// cancel any possible offset in position and time the input file
+    //candidate->Position.SetZ(z - dz0 + dz);
+    //candidate->Position.SetT(t - dt0 + dt);
+    //=================================================================
+    
+    //=======================New Added by Pablo========================
+    Double_t tf_smeared = gRandom->Gaus(0, fTimeResolution);
+    dt = dt + tf_smeared * 1.0E3*c_light;
+    candidate->Position.SetZ(z + dz);
+    candidate->Position.SetT(t + dt);
+    candidate->ErrorT = fTimeResolution * 1.0E3 * c_light;
+    vt += (t + dt);
+ 
     candidate->IsPU = 0;
 
     fParticleOutputArray->Add(candidate);
 
     if(TMath::Abs(candidate->Charge) >  1.0E-9)
     {
+      //Added by Pablo
       nch++;
       sumpt2 += pt*pt;
       vertex->AddCandidate(candidate);
     }
   }
 
-  if(numberOfParticles > 0)
+
+  if(nch > 0)
   {
-    vx /= sumpt2;
-    vy /= sumpt2;
+    vx /= nch;
+    vy /= nch;
+    vt /= nch;
   }
 
   nvtx++;
-  vertex->Position.SetXYZT(vx, vy, dz, dt);
+  vertex->Position.SetXYZT(vx, vy, dz, vt);
   vertex->ClusterIndex = nvtx;
   vertex->ClusterNDF = nch;
   vertex->SumPT2 = sumpt2;
@@ -238,10 +252,10 @@ void PileUpMerger::Process()
 
     numberOfParticles = 0;
     sumpt2 = 0.0;
+    nch = 0;
 
     //factory = GetFactory();
     vertex = factory->NewCandidate();
-
     while(fReader->ReadParticle(pid, x, y, z, t, px, py, pz, e))
     {
       candidate = factory->NewCandidate();
@@ -254,6 +268,11 @@ void PileUpMerger::Process()
       candidate->Charge = pdgParticle ? Int_t(pdgParticle->Charge()/3.0) : -999;
       candidate->Mass = pdgParticle ? pdgParticle->Mass() : -999.9;
 
+      //=======================New Added by Pablo========================
+      Double_t tf_smeared = gRandom->Gaus(0, fTimeResolution);
+      dt = dt + tf_smeared * 1.0E3*c_light;
+      vt += (t + dt);
+ 
       candidate->IsPU = 1;
 
       candidate->Momentum.SetPxPyPzE(px, py, pz, e);
@@ -263,6 +282,7 @@ void PileUpMerger::Process()
       x -= fInputBeamSpotX;
       y -= fInputBeamSpotY;
       candidate->Position.SetXYZT(x, y, z + dz, t + dt);
+      candidate->ErrorT = fTimeResolution * 1.0E3 * c_light;
       candidate->Position.RotateZ(dphi);
       candidate->Position += TLorentzVector(fOutputBeamSpotX, fOutputBeamSpotY, 0.0, 0.0);
 
@@ -279,11 +299,13 @@ void PileUpMerger::Process()
 
       fParticleOutputArray->Add(candidate);
     }
-
-    if(numberOfParticles > 0)
+    //Added by Pablo: don't want to consider vertices where there are no charged particles. 
+    if(nch == 0) continue;
+    if(nch > 0)
     {
-      vx /= numberOfParticles;
-      vy /= numberOfParticles;
+      vx /= nch;
+      vy /= nch;
+      vt /= nch;
     }
 
     nvtx++;

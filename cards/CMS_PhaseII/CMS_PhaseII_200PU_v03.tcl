@@ -16,7 +16,6 @@ set ExecutionPath {
   PileUpMerger
   ParticlePropagator
   TrackMergerProp
-
   DenseProp
   DenseMergeTracks
   DenseTrackFilter
@@ -128,8 +127,8 @@ set ExecutionPath {
   TauTaggingPUPPIAK8
 
   TreeWriter
-}
 
+}
 
 ###############
 # PileUp Merger
@@ -137,6 +136,8 @@ set ExecutionPath {
 
 module PileUpMerger PileUpMerger {
   set InputArray Delphes/stableParticles
+  
+  set TimeResolution 300E-8
 
   set ParticleOutputArray stableParticles
   set VertexOutputArray vertices
@@ -161,12 +162,27 @@ module PileUpMerger PileUpMerger {
 
 
 
+#################################
+## Apply time smearing on the tracks
+###################################
+
+module TimeSmearing TimeSmearing {
+
+  set InputArray PileUpMerger/stableParticles
+  set OutputArray stableParticles
+  set TimeResolution 300E-8
+
+}
+
+
+
 #####################################
 # Track propagation to calorimeters
 #####################################
 
 module ParticlePropagator ParticlePropagator {
   set InputArray PileUpMerger/stableParticles
+  #set InputArray TimeSmearing/stableParticles
 
   set OutputArray stableParticles
   set NeutralOutputArray neutralParticles
@@ -204,7 +220,8 @@ module Merger TrackMergerProp {
 module ParticlePropagator DenseProp {
 
   set InputArray TrackMergerProp/tracks
-
+  
+  
   # radius of the first pixel layer
   set Radius 0.3
   set RadiusMax 1.29
@@ -2226,7 +2243,6 @@ module Isolation MuonIsolationCHS {
 #####################
 # Muon Loose Id     #
 #####################
-
 module Efficiency MuonLooseIdEfficiency {
     set InputArray MuonIsolation/muons
     set OutputArray muons
@@ -2239,7 +2255,6 @@ module Efficiency MuonLooseIdEfficiency {
 ##################
 # Muon Tight Id  #
 ##################
-
 module Efficiency MuonTightIdEfficiency {
     set InputArray MuonIsolation/muons
     set OutputArray muons
@@ -4090,18 +4105,22 @@ module TreeWriter TreeWriter {
 
 
 
-# add Branch InputArray BranchName BranchClass
+  #add Branch InputArray BranchName BranchClass
   add Branch GenParticleFilter/filteredParticles Particle GenParticle
   #add Branch Delphes/allParticles Particle GenParticle
   add Branch PileUpMerger/vertices Vertex Vertex
-
+  #add Branch TimeSmearing/stableParticles MyParticle GenParticle
+  #add Branch ParticlePropagator/stableParticles MyParticle2 GenParticle
+  #add Branch ParticlePropagator/muons MyParticle2 Muon
+  #add Branch DenseProp/stableParticles MyParticle3 GenParticle 
+  
   add Branch GenJetFinder/jets GenJet Jet
   add Branch GenJetFinderAK8/jetsAK8 GenJetAK8 Jet
   add Branch GenMissingET/momentum GenMissingET MissingET
 
-#  add Branch HCal/eflowTracks EFlowTrack Track
-#  add Branch ECal/eflowPhotons EFlowPhoton Tower
-#  add Branch HCal/eflowNeutralHadrons EFlowNeutralHadron Tower
+  add Branch HCal/eflowTracks EFlowTrack Track
+  #add Branch ECal/eflowPhotons EFlowPhoton Tower
+  #add Branch HCal/eflowNeutralHadrons EFlowNeutralHadron Tower
 
   add Branch PhotonLooseID/photons PhotonLoose Photon
   add Branch PhotonTightID/photons PhotonTight Photon
@@ -4110,7 +4129,7 @@ module TreeWriter TreeWriter {
   add Branch MuonLooseIdEfficiency/muons MuonLoose Muon
   add Branch MuonTightIdEfficiency/muons MuonTight Muon
 
-#  add Branch PhotonEfficiencyCHS/photons PhotonCHS Photon
+  #add Branch PhotonEfficiencyCHS/photons PhotonCHS Photon
   add Branch ElectronEfficiencyCHS/electrons ElectronCHS Electron
   add Branch MuonLooseIdEfficiencyCHS/muons MuonLooseCHS Muon
   add Branch MuonTightIdEfficiencyCHS/muons MuonTightCHS Muon
