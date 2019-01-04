@@ -48,6 +48,7 @@ private:
 
   Int_t fPileUpDistribution;
   Double_t fTimeResolution;
+  Double_t fTimeWindow;
   
   Double_t fMeanPileUp;
   Double_t fZVertexSpread;

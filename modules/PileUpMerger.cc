@@ -72,7 +72,8 @@ void PileUpMerger::Init()
 {
   const char *fileName;
 
-  fTimeResolution = GetDouble("TimeResolution", 1.0E-10);
+  fTimeResolution = GetDouble("TimeResolution", 30.0E-12);
+  fTimeWindow     = GetDouble("DiscardChargedParticlesOutside", 90.0E-12);
 
   fPileUpDistribution = GetInt("PileUpDistribution", 0);
 
@@ -117,7 +118,7 @@ void PileUpMerger::Process()
   TDatabasePDG *pdg = TDatabasePDG::Instance();
   TParticlePDG *pdgParticle;
   Int_t pid, nch, nvtx = -1;
-  Float_t x, y, z, t, vx, vy, vt;
+  Float_t x, y, z, t, vx, vy, vt, vt_ref;
   Float_t px, py, pz, e, pt;
   Double_t dz, dphi, dt, sumpt2, dz0, dt0;
   Int_t numberOfEvents, event, numberOfParticles;
@@ -206,6 +207,8 @@ void PileUpMerger::Process()
   vertex->SumPT2 = sumpt2;
   vertex->GenSumPT2 = sumpt2;
   fVertexOutputArray->Add(vertex);
+  //Added by Pablo: contains the time of the primary vertex.
+  vt_ref = vt;
 
   // --- Then with pile-up vertices  ------
 
@@ -289,7 +292,10 @@ void PileUpMerger::Process()
       vx += candidate->Position.X();
       vy += candidate->Position.Y();
 
+      //Added by Pablo: if it is a charged particle and its time is outside the time window wrt the primary vertex we discard it.    
+      if(TMath::Abs(candidate->Charge) >  1.0E-9 && TMath::Abs((t + dt) - vt_ref) > fTimeWindow * 1.0E3 * c_light) continue; 
       ++numberOfParticles;
+       
       if(TMath::Abs(candidate->Charge) >  1.0E-9)
       {
         nch++;

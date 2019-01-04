@@ -137,8 +137,8 @@ set ExecutionPath {
 module PileUpMerger PileUpMerger {
   set InputArray Delphes/stableParticles
   
-  set TimeResolution 300E-12
-
+  set TimeResolution 30E-12
+  set DiscardChargedParticlesOutside 90E-12
   set ParticleOutputArray stableParticles
   set VertexOutputArray vertices
 
