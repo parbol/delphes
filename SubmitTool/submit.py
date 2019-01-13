@@ -15,15 +15,16 @@ template = """
 pushd CMSSWRELEASE/src
 eval `scramv1 runtime -sh`
 pushd
-./DelphesCMSFWLite CARD OUTPUT FIRSTEVENT LASTEVENT INPUT 
+EXENAME CARD OUTPUT FIRSTEVENT LASTEVENT INPUT 
 """
 
 ##############################################################################################################################################
-def prepareJob(fileName, initevent, endevent, outputfilename, logfilename, errfilename, jobname, cardLocation, cmsswrelease, launcher, queue):
+def prepareJob(exeName, fileName, initevent, endevent, outputfilename, logfilename, errfilename, jobname, cardLocation, cmsswrelease, launcher, queue):
 
     thisText = template
     thisText = thisText.replace('CMSSWRELEASE', cmsswrelease)
     thisText = thisText.replace('CARD', cardLocation)
+    thisText = thisText.replace('EXENAME', exeName)
     thisText = thisText.replace('OUTPUT', outputfilename)
     thisText = thisText.replace('FIRSTEVENT', str(initevent))
     thisText = thisText.replace('LASTEVENT', str(endevent))
@@ -36,14 +37,14 @@ def prepareJob(fileName, initevent, endevent, outputfilename, logfilename, errfi
     script = open(launcher, 'a')
     script.write('chmod +x submit_{0}.sh\n'.format(jobname))
     if logfilename == 'none' and errfilename == 'none':
-        script.write('qsub -q {0} submit_{1}.sh\n'.format(queue, jobname))
+        script.write('bsub -q {0} submit_{1}.sh\n'.format(queue, jobname))
     else:
-        script.write('qsub -o {0} -e {1} -q {2} submit_{3}.sh\n'.format(logfilename, errfilename, queue, jobname))
+        script.write('bsub -o {0} -e {1} -q {2} submit_{3}.sh\n'.format(logfilename, errfilename, queue, jobname))
     script.close()
 
 
 ##############################################################################################################################################
-def prepareJobs(inputPath, fileName, numberOfEvents, outputDirectory, logLocation, eventsPerJob, cardLocation, cmsswrelease, launcher, queue):
+def prepareJobs(exeName, inputPath, fileName, numberOfEvents, outputDirectory, logLocation, eventsPerJob, cardLocation, cmsswrelease, launcher, queue):
 
     nameTemplate = fileName[0:fileName.find('.root')]
     chunkCounter = 0
@@ -54,11 +55,11 @@ def prepareJobs(inputPath, fileName, numberOfEvents, outputDirectory, logLocatio
         initevent = chunkCounter * eventsPerJob
         endevent = (chunkCounter + 1) * eventsPerJob if (chunkCounter + 1) * eventsPerJob < numberOfEvents else numberOfEvents
         if logLocation == 'none':
-            prepareJob(inputfilename, initevent, endevent, outputfilename, 'none', 'none', jobname, cardLocation, cmsswrelease, launcher, queue)
+            prepareJob(exeName, inputfilename, initevent, endevent, outputfilename, 'none', 'none', jobname, cardLocation, cmsswrelease, launcher, queue)
         else:
             logfilename = '{0}/{1}_chunk{2}.log'.format(logLocation, nameTemplate, str(chunkCounter))
             errfilename = '{0}/{1}_chunk{2}.err'.format(logLocation, nameTemplate, str(chunkCounter))
-            prepareJob(inputfilename, initevent, endevent, outputfilename, logfilename, errfilename, jobname, cardLocation, cmsswrelease, launcher, queue)
+            prepareJob(exeName, inputfilename, initevent, endevent, outputfilename, logfilename, errfilename, jobname, cardLocation, cmsswrelease, launcher, queue)
         chunkCounter = chunkCounter + 1
 
 
@@ -99,6 +100,11 @@ if __name__ == '__main__':
         print('Error: Launcher already exists.')
         sys.exit()
   
+    exeName = '{}/DelphesCMSFWLite'.format(os.getcwd())
+    if not os.path.isfile(exeName):
+        print('Error: No DelphesCMSSFWLite detected in the working directory.')
+        sys.exit()
+
     listOfFiles = []
     for ji in os.listdir(inputPath):
         if ji.find('.root') == -1:
@@ -122,6 +128,7 @@ if __name__ == '__main__':
     if logLocation != 'none' and not os.path.isdir(logLocation):
         os.mkdir(logLocation)
 
+    
     jcount = 0
     for ji in listOfFiles:
         thefile = r.TFile.Open('{0}/{1}'.format(inputPath,ji))
@@ -131,7 +138,7 @@ if __name__ == '__main__':
             continue
         numberOfEvents = tree.GetEntries()
         thefile.Close()
-        prepareJobs(inputPath, ji, numberOfEvents, outputDirectory, logLocation, eventsPerJob, cardLocation, cmsswrelease, launcher, queue)
+        prepareJobs(exeName, inputPath, ji, numberOfEvents, outputDirectory, logLocation, eventsPerJob, cardLocation, cmsswrelease, launcher, queue)
         jcount = jcount + 1 
 
   

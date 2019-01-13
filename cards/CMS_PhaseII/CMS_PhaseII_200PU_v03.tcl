@@ -4106,10 +4106,10 @@ module TreeWriter TreeWriter {
 
 
   #add Branch InputArray BranchName BranchClass
-  add Branch GenParticleFilter/filteredParticles Particle GenParticle
+  #add Branch GenParticleFilter/filteredParticles Particle GenParticle
   #add Branch Delphes/allParticles Particle GenParticle
   add Branch PileUpMerger/vertices Vertex Vertex
-  #add Branch TimeSmearing/stableParticles MyParticle GenParticle
+  add Branch PileUpMerger/stableParticles MyParticle GenParticle
   #add Branch ParticlePropagator/stableParticles MyParticle2 GenParticle
   #add Branch ParticlePropagator/muons MyParticle2 Muon
   #add Branch DenseProp/stableParticles MyParticle3 GenParticle 
