@@ -32,6 +32,7 @@
 class TObjArray;
 class DelphesPileUpReader;
 class DelphesTF2;
+class Candidate;
 
 class PileUpMerger: public DelphesModule
 {
@@ -43,12 +44,20 @@ public:
   void Init();
   void Process();
   void Finish();
+  Candidate *Propagate(Candidate *);
 
 private:
 
   Int_t fPileUpDistribution;
   Double_t fTimeResolution;
-  
+  Double_t fTimeWindow;
+  Double_t fLowEtaRange;
+  Double_t fHighEtaRange;
+  Double_t fEfficiencyTiming;
+  Double_t fRadius, fRadius2, fRadiusMax, fHalfLength, fHalfLengthMax;
+  Double_t fBz;
+
+ 
   Double_t fMeanPileUp;
   Double_t fZVertexSpread;
   Double_t fTVertexSpread;
@@ -63,8 +72,10 @@ private:
   DelphesPileUpReader *fReader; //!
 
   TIterator *fItInputArray; //!
-
   const TObjArray *fInputArray; //!
+  
+  TIterator *fItInputArraySecond; //!
+  const TObjArray *fInputArraySecond; //!
 
   TObjArray *fParticleOutputArray; //!
   TObjArray *fVertexOutputArray; //!
