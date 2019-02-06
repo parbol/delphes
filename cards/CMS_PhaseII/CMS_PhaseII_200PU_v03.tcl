@@ -139,7 +139,7 @@ module PileUpMerger PileUpMerger {
 
   #Added by Pablo#########
   set TimeResolution 30E-12
-  set TimeWindow 10
+  set TimeWindow 100
   set LowEtaRange 1.5
   set HighEtaRange 1.7
   set EfficiencyTiming 1.0
@@ -157,11 +157,11 @@ module PileUpMerger PileUpMerger {
   set VertexOutputArray vertices
 
   # pre-generated minbias input file
-  set PileUpFile /eos/cms/store/group/upgrade/delphes/PhaseII/MinBias_100k.pileup
+  #set PileUpFile /gpfs/users/parbol/delphes/MinBias_100k.pileup
   #set PileUpFile MinBias.pileup
   
   # average expected pile up
-  set MeanPileUp 200
+  set MeanPileUp 0
 
   # maximum spread in the beam direction in m
   set ZVertexSpread 0.25
@@ -4105,11 +4105,11 @@ module TreeWriter TreeWriter {
 
 
 #add Branch InputArray BranchName BranchClass
-#add Branch Delphes/allParticles Particle GenParticle
+add Branch Delphes/stableParticles Particle GenParticle
 add Branch PileUpMerger/vertices Vertex Vertex
-add Branch PileUpMerger/stableParticles Particle GenParticle
+add Branch PileUpMerger/stableParticles Particle2 GenParticle
 #add Branch TimeSmearing/stableParticles MyParticle GenParticle
-add Branch ParticlePropagator/stableParticles MyParticle2 GenParticle
+#add Branch ParticlePropagator/stableParticles MyParticle2 GenParticle
 #add Branch ParticlePropagator/muons MyParticle2 Muon
 #add Branch DenseProp/stableParticles MyParticle3 GenParticle 
 

@@ -401,7 +401,7 @@ int main(int argc, char *argv[])
 
         modularDelphes->Clear();
         treeWriter->Clear();
-
+        cout << "Hey" << endl;
         progressBar.Update(eventCounter, eventCounter);
         ++eventCounter;
       }
