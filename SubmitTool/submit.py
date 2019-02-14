@@ -7,7 +7,7 @@
 ##    Check: https://twiki.cern.ch/twiki/bin/viewauth/CMS/MTDPhysicsTDR     ##
 ##############################################################################
 ##############################################################################
-import os, sys, optparse
+import os, sys, optparse, stat
 import ROOT as r
 
 templateLSF = """
@@ -17,6 +17,27 @@ eval `scramv1 runtime -sh`
 pushd
 EXENAME CARD OUTPUT FIRSTEVENT LASTEVENT INPUT 
 """
+
+
+templateCONDOR = """#!/bin/bash
+pushd CMSSWRELEASE/src
+eval `scramv1 runtime -sh`
+pushd
+EXENAME CARD OUTPUT FIRSTEVENT LASTEVENT INPUT 
+"""
+
+templateCONDORsub = """
+universe                = vanilla
+executable              = $(filename)
+output                  = LOGLOCATION/$(ClusterId).$(ProcId).out
+error                   = LOGLOCATION/$(ClusterId).$(ProcId).err
+log                     = LOGLOCATION/$(ClusterId).log
+Notify_user             = pablom@cern.ch
++JobFlavour = "QUEUE" 
+queue filename matching (NAMEOFFILES)
+"""
+
+
 
 
 templateIFCA = """
@@ -58,6 +79,38 @@ EXENAME CARD OUTPUT FIRSTEVENT LASTEVENT INPUT
 
 
 
+
+##############################################################################################################################################
+def prepareJobCondorSubmitter(exeName, fileName, initevent, endevent, outputfilename, logfilename, errfilename, jobname, cardLocation, cmsswrelease, launcher, queue, site, logLocation, nameTemplate):
+
+    thisText = templateCONDORsub
+    thisText = thisText.replace('LOGLOCATION', logLocation)
+    thisText = thisText.replace('QUEUE', queue)
+    thisText = thisText.replace('NAMEOFFILES', 'submit_*sh')
+    
+    routput = open(launcher, 'w')
+    routput.write(thisText)
+    routput.close()
+
+
+##############################################################################################################################################
+def prepareJobCondor(exeName, fileName, initevent, endevent, outputfilename, logfilename, errfilename, jobname, cardLocation, cmsswrelease, launcher, queue, site):
+
+    thisText = templateCONDOR
+    thisText = thisText.replace('NAMEOFJOB', jobname)
+    thisText = thisText.replace('CMSSWRELEASE', cmsswrelease)
+    thisText = thisText.replace('CARD', cardLocation)
+    thisText = thisText.replace('EXENAME', exeName)
+    thisText = thisText.replace('OUTPUT', outputfilename)
+    thisText = thisText.replace('FIRSTEVENT', str(initevent))
+    thisText = thisText.replace('LASTEVENT', str(endevent))
+    thisText = thisText.replace('INPUT', fileName)
+    
+    routput = open('submit_{0}.sh'.format(jobname), 'w')
+    routput.write(thisText)
+    routput.close()
+    os.chmod('submit_{0}.sh'.format(jobname), 0755) 
+
 ##############################################################################################################################################
 def prepareJob(exeName, fileName, initevent, endevent, outputfilename, logfilename, errfilename, jobname, cardLocation, cmsswrelease, launcher, queue, site):
 
@@ -77,7 +130,7 @@ def prepareJob(exeName, fileName, initevent, endevent, outputfilename, logfilena
     routput = open('submit_{0}.sh'.format(jobname), 'w')
     routput.write(thisText)
     routput.close()
-    
+
     script = open(launcher, 'a')
     script.write('chmod +x submit_{0}.sh\n'.format(jobname))
     if logfilename == 'none' and errfilename == 'none':
@@ -105,14 +158,20 @@ def prepareJobs(exeName, inputPath, fileName, numberOfEvents, outputDirectory, l
         outputfilename = '{0}/{1}_chunk{2}.root'.format(outputDirectory, nameTemplate, str(chunkCounter))
         initevent = chunkCounter * eventsPerJob
         endevent = (chunkCounter + 1) * eventsPerJob if (chunkCounter + 1) * eventsPerJob < numberOfEvents else numberOfEvents
-        if logLocation == 'none':
-            prepareJob(exeName, inputfilename, initevent, endevent, outputfilename, 'none', 'none', jobname, cardLocation, cmsswrelease, launcher, queue, site)
+        if site == 'ifca' or site == 'lsflxplus': 
+            if logLocation == 'none':
+                prepareJob(exeName, inputfilename, initevent, endevent, outputfilename, 'none', 'none', jobname, cardLocation, cmsswrelease, launcher, queue, site)
+            else:
+                logfilename = '{0}/{1}_chunk{2}.log'.format(logLocation, nameTemplate, str(chunkCounter))
+                errfilename = '{0}/{1}_chunk{2}.err'.format(logLocation, nameTemplate, str(chunkCounter))
+                prepareJob(exeName, inputfilename, initevent, endevent, outputfilename, logfilename, errfilename, jobname, cardLocation, cmsswrelease, launcher, queue, site)
+            chunkCounter = chunkCounter + 1
         else:
-            logfilename = '{0}/{1}_chunk{2}.log'.format(logLocation, nameTemplate, str(chunkCounter))
-            errfilename = '{0}/{1}_chunk{2}.err'.format(logLocation, nameTemplate, str(chunkCounter))
-            prepareJob(exeName, inputfilename, initevent, endevent, outputfilename, logfilename, errfilename, jobname, cardLocation, cmsswrelease, launcher, queue, site)
-        chunkCounter = chunkCounter + 1
-
+            prepareJobCondor(exeName, inputfilename, initevent, endevent, outputfilename, 'none', 'none', jobname, cardLocation, cmsswrelease, launcher, queue, site)
+     
+    if site == 'condor': 
+        prepareJobCondorSubmitter(exeName, inputfilename, initevent, endevent, outputfilename, 'none', 'none', jobname, cardLocation, cmsswrelease, launcher, queue, site, logLocation, nameTemplate)
+            
 
 
 
@@ -145,7 +204,7 @@ if __name__ == '__main__':
     cmsswrelease = opts.cmsswrelease 
     inputPath = args[0]
     
-    if site != 'ifca' and site != 'lsflxplus' and site != 'condorlxplus':
+    if site != 'ifca' and site != 'lsflxplus' and site != 'condor':
         print('Error: The site is not valid.')
         sys.exit()
 
@@ -184,6 +243,13 @@ if __name__ == '__main__':
     
     if logLocation != 'none' and not os.path.isdir(logLocation):
         os.mkdir(logLocation)
+
+    if logLocation == 'none' and not os.path.isdir('{}/logs'.format(os.getcwd())):
+        logLocation = '{}/logs'.format(os.getcwd())
+        os.mkdir(logLocation)
+    else:
+        print('Error: the log file was not specified, and the standard one already exists')
+        sys.exit()
 
     
     jcount = 0

@@ -139,7 +139,7 @@ module PileUpMerger PileUpMerger {
   set InputArray Delphes/stableParticles
 
   #Added by Pablo#########
-  set TimeResolution 30E-15
+  set TimeResolution 30E-12
   set TimeWindow 100
   set LowEtaRange 1.5
   set HighEtaRange 1.7
