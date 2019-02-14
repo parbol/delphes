@@ -121,7 +121,7 @@ void ConvertInput(fwlite::Event &event, Long64_t eventCounter,
 
   Int_t pid, status;
   Double_t px, py, pz, e, mass;
-  Double_t x, y, z;
+  Double_t x, y, z, t;
 
   element = static_cast<HepMCEvent *>(branchEvent->NewEntry());
 
@@ -159,6 +159,8 @@ void ConvertInput(fwlite::Event &event, Long64_t eventCounter,
 
   pdg = TDatabasePDG::Instance();
 
+  const Double_t c_light = 2.99792458E8;
+
   for(itParticle = handleParticle->begin(); itParticle != handleParticle->end(); ++itParticle)
   {
     const reco::GenParticle &particle = *itParticle;
@@ -173,7 +175,7 @@ void ConvertInput(fwlite::Event &event, Long64_t eventCounter,
     status = particle.status();
     if(isMiniAOD && particle.status() == 1) continue;
     px = particle.px(); py = particle.py(); pz = particle.pz(); e = particle.energy(); mass = particle.mass();
-    x = particle.vx(); y = particle.vy(); z = particle.vz();
+    x = particle.vx(); y = particle.vy(); z = particle.vz(); 
 
     candidate = factory->NewCandidate();
 
@@ -200,7 +202,31 @@ void ConvertInput(fwlite::Event &event, Long64_t eventCounter,
 
     candidate->Momentum.SetPxPyPzE(px, py, pz, e);
 
-    candidate->Position.SetXYZT(x*10.0, y*10.0, z*10.0, 0.0);
+    bool isLongLived = false;
+    if(pid == 1000039) {
+        isLongLived = true;
+    } else {
+        const reco::Candidate *mother = particle.mother(0);
+        while(mother != NULL) {
+            if(mother->pdgId() == 1000039) {
+                isLongLived = true;
+                break;
+            }
+            mother = mother->mother(0);
+        }
+    }
+
+ 
+    if(isLongLived) {
+        Double_t p = sqrt(px*px + py*py + pz*pz);
+        Double_t E = sqrt(p*p + mass*mass);
+        Double_t vz = pz / E;
+        t = (z*10.0) / (vz * c_light * 1.0E3);
+        candidate->Position.SetXYZT(x*10.0, y*10.0, z*10.0, t);
+    } else {
+        candidate->Position.SetXYZT(x*10.0, y*10.0, z*10.0, 0);
+    }
+
 
     allParticleOutputArray->Add(candidate);
 
@@ -401,7 +427,6 @@ int main(int argc, char *argv[])
 
         modularDelphes->Clear();
         treeWriter->Clear();
-        cout << "Hey" << endl;
         progressBar.Update(eventCounter, eventCounter);
         ++eventCounter;
       }

@@ -135,10 +135,11 @@ set ExecutionPath {
 ###############
 
 module PileUpMerger PileUpMerger {
+
   set InputArray Delphes/stableParticles
 
   #Added by Pablo#########
-  set TimeResolution 30E-12
+  set TimeResolution 30E-15
   set TimeWindow 100
   set LowEtaRange 1.5
   set HighEtaRange 1.7
@@ -4105,7 +4106,7 @@ module TreeWriter TreeWriter {
 
 
 #add Branch InputArray BranchName BranchClass
-add Branch Delphes/stableParticles Particle GenParticle
+#add Branch Delphes/stableParticles Particle GenParticle
 add Branch PileUpMerger/vertices Vertex Vertex
 add Branch PileUpMerger/stableParticles Particle2 GenParticle
 #add Branch TimeSmearing/stableParticles MyParticle GenParticle

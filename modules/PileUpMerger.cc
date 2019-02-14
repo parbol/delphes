@@ -145,7 +145,7 @@ void PileUpMerger::Process()
   TDatabasePDG *pdg = TDatabasePDG::Instance();
   TParticlePDG *pdgParticle;
   Int_t pid, nch, nvtx = -1;
-  Float_t x, y, z, t, vx, vy, vt, vt_ref;
+  Float_t x, y, z, t, vx, vy, vz, vt, vt_ref;
   Float_t px, py, pz, e, pt;
   Double_t dz, dphi, dt, sumpt2, dz0, dt0;
   Int_t numberOfEvents, event, numberOfParticles;
@@ -165,10 +165,11 @@ void PileUpMerger::Process()
   dt0 = -1.0e6;
 
   dt *= c_light*1.0E3; // necessary in order to make t in mm/c
-  dz *= 1.0E3; // necessary in order to make z in mm
+  dz *= 1.0E3;         // necessary in order to make z in mm
 
   vx = 0.0;
   vy = 0.0;
+  vz = 0.0;
   vt = 0.0;
 
   numberOfParticles = fInputArray->GetEntriesFast();
@@ -178,14 +179,11 @@ void PileUpMerger::Process()
   factory = GetFactory();
   vertex = factory->NewCandidate();
 
-  std::cout << "I come here often " << numberOfParticles << std::endl;
+  //std::cout << "Event===================================" << std::endl;
 
   //while((candidate = static_cast<Candidate*>(fItInputArray->Next())) && (candidateSecond = static_cast<Candidate*>(fItInputArraySecond->Next())))
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
   {
-    std::cout << "but not here " << numberOfParticles << std::endl;
-    vx += candidate->Position.X();
-    vy += candidate->Position.Y();
     z = candidate->Position.Z();
     t = candidate->Position.T();
     pt = candidate->Momentum.Pt();
@@ -207,6 +205,8 @@ void PileUpMerger::Process()
     candidate->Position.SetZ(z + dz);
     candidate->Position.SetT(t + dt);
     candidate->ErrorT = 200E-12 * 1.0E3 * c_light;
+    //std::cout << candidate->PID << " " << sqrt(candidate->Position.X() * candidate->Position.X() + candidate->Position.Y() * candidate->Position.Y()) << " " << t << std::endl;
+
     //Propagate the particle to the timing detector geometry
     //Candidate *theProp = static_cast<Candidate*>(candidate->Clone());
     //Candidate *prop = Propagate(theProp);
@@ -217,15 +217,17 @@ void PileUpMerger::Process()
     //        candidate->ErrorT = fTimeResolution * 1.0E3 * c_light;
     //    }
     //}
-    vt += (t + dt);
     candidate->IsPU = 0;
     fParticleOutputArray->Add(candidate);
-    std::cout << "Particle put in array" << std::endl;
-    if(TMath::Abs(candidate->Charge) >  1.0E-9)
+    if(TMath::Abs(candidate->Charge) >  1.0E-9 && sqrt(candidate->Position.X()*candidate->Position.X() + candidate->Position.Y()*candidate->Position.Y()) < 2)
     {
       //Added by Pablo
       nch++;
       sumpt2 += pt*pt;
+      vx += candidate->Position.X();
+      vy += candidate->Position.Y();
+      vt += (t + dt);
+      vz += (z + dz);
       vertex->AddCandidate(candidate);
     }
   }
@@ -235,11 +237,12 @@ void PileUpMerger::Process()
   {
     vx /= nch;
     vy /= nch;
+    vz /= nch;
     vt /= nch;
   }
 
   nvtx++;
-  vertex->Position.SetXYZT(vx, vy, dz, vt);
+  vertex->Position.SetXYZT(vx, vy, vz, vt);
   vertex->ClusterIndex = nvtx;
   vertex->ClusterNDF = nch;
   vertex->SumPT2 = sumpt2;
@@ -291,6 +294,7 @@ void PileUpMerger::Process()
 
     vx = 0.0;
     vy = 0.0;
+    vz = 0.0;
 
     numberOfParticles = 0;
     sumpt2 = 0.0;
@@ -313,7 +317,6 @@ void PileUpMerger::Process()
       //=======================New Added by Pablo========================
       Double_t tf_smeared = gRandom->Gaus(0, fTimeResolution);
       dt = dt + tf_smeared * 1.0E3*c_light;
-      vt += (t + dt);
  
       candidate->IsPU = 1;
 
@@ -343,16 +346,18 @@ void PileUpMerger::Process()
       candidate->Position.RotateZ(dphi);
       candidate->Position += TLorentzVector(fOutputBeamSpotX, fOutputBeamSpotY, 0.0, 0.0);
 
-      vx += candidate->Position.X();
-      vy += candidate->Position.Y();
       //If it's a charged particle, with a valid timeMeasurement, and outside a time window w.r.t. vertex
       //if(timeMeasurement && TMath::Abs(candidate->Charge) >  1.0E-9 && TMath::Abs((t + dt) - vt_ref) > fTimeWindow * 1.0E3 * c_light) continue; 
 
       ++numberOfParticles;
-      if(TMath::Abs(candidate->Charge) >  1.0E-9)
+      if(TMath::Abs(candidate->Charge) >  1.0E-9 && sqrt(candidate->Position.X()*candidate->Position.X() + candidate->Position.Y()*candidate->Position.Y()) < 2)
       {
         nch++;
         sumpt2 += pt*pt;
+        vx += candidate->Position.X();
+        vy += candidate->Position.Y();
+        vz += (z + dz);
+        vt += (t + dt);
         vertex->AddCandidate(candidate);
       }
 
@@ -364,12 +369,13 @@ void PileUpMerger::Process()
     {
       vx /= nch;
       vy /= nch;
+      vz /= nch;
       vt /= nch;
     }
 
     nvtx++;
 
-    vertex->Position.SetXYZT(vx, vy, dz, dt);
+    vertex->Position.SetXYZT(vx, vy, vz, vt);
 
     vertex->ClusterIndex = nvtx;
     vertex->ClusterNDF = nch;
