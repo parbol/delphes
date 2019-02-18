@@ -201,32 +201,33 @@ void ConvertInput(fwlite::Event &event, Long64_t eventCounter,
     candidate->Mass = mass;
 
     candidate->Momentum.SetPxPyPzE(px, py, pz, e);
+    
 
     bool isLongLived = false;
-    if(pid == 1000039) {
-        isLongLived = true;
-    } else {
-        const reco::Candidate *mother = particle.mother(0);
-        while(mother != NULL) {
-            if(mother->pdgId() == 1000039) {
-                isLongLived = true;
-                break;
-            }
-            mother = mother->mother(0);
+    const reco::Candidate *mother = particle.mother(0);
+    float pxm, pym, pzm, em, xm, ym, zm;
+    while(mother != NULL) {
+        if(mother->pdgId() == 1000022) {
+            isLongLived = true;
+            pxm = mother->px();
+            pym = mother->py();
+            pzm = mother->pz();
+            em = mother->energy();
+            xm = mother->vx();
+            ym = mother->vy();
+            zm = mother->vz();
+            break;
         }
-    }
+        mother = mother->mother(0);
+    } 
 
- 
     if(isLongLived) {
-        Double_t p = sqrt(px*px + py*py + pz*pz);
-        Double_t E = sqrt(p*p + mass*mass);
-        Double_t vz = pz / E;
-        t = (z*10.0) / (vz * c_light * 1.0E3);
-        candidate->Position.SetXYZT(x*10.0, y*10.0, z*10.0, t);
+        Double_t vz = pzm / em;
+        t = ((z-zm)*10.0) / vz;
     } else {
-        candidate->Position.SetXYZT(x*10.0, y*10.0, z*10.0, 0);
+        t = 0;
     }
-
+    candidate->Position.SetXYZT(x*10.0, y*10.0, z*10.0, t);
 
     allParticleOutputArray->Add(candidate);
 

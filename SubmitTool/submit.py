@@ -244,7 +244,7 @@ if __name__ == '__main__':
     if logLocation != 'none' and not os.path.isdir(logLocation):
         os.mkdir(logLocation)
 
-    if logLocation == 'none' and not os.path.isdir('{}/logs'.format(os.getcwd())):
+    elif logLocation == 'none' and not os.path.isdir('{}/logs'.format(os.getcwd())):
         logLocation = '{}/logs'.format(os.getcwd())
         os.mkdir(logLocation)
     else:

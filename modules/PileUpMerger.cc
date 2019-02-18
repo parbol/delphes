@@ -179,7 +179,6 @@ void PileUpMerger::Process()
   factory = GetFactory();
   vertex = factory->NewCandidate();
 
-  //std::cout << "Event===================================" << std::endl;
 
   //while((candidate = static_cast<Candidate*>(fItInputArray->Next())) && (candidateSecond = static_cast<Candidate*>(fItInputArraySecond->Next())))
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
@@ -187,7 +186,6 @@ void PileUpMerger::Process()
     z = candidate->Position.Z();
     t = candidate->Position.T();
     pt = candidate->Momentum.Pt();
-  
 
     //===========================Original===============================
     //if (dz0 < -999999.0)
@@ -201,22 +199,20 @@ void PileUpMerger::Process()
     
     //=======================New Added by Pablo========================
     Double_t tf_smeared = gRandom->Gaus(0, fTimeResolution);
-    dt = dt + tf_smeared * 1.0E3*c_light;
+    Double_t dt2 = dt + tf_smeared * 1.0E3 * c_light;
     candidate->Position.SetZ(z + dz);
-    candidate->Position.SetT(t + dt);
+    candidate->Position.SetT(t + dt2);
     candidate->ErrorT = 200E-12 * 1.0E3 * c_light;
-    //std::cout << candidate->PID << " " << sqrt(candidate->Position.X() * candidate->Position.X() + candidate->Position.Y() * candidate->Position.Y()) << " " << t << std::endl;
-
     //Propagate the particle to the timing detector geometry
-    //Candidate *theProp = static_cast<Candidate*>(candidate->Clone());
-    //Candidate *prop = Propagate(theProp);
-    //if(prop != NULL) {
-    //    Double_t eta = fabs(prop->Momentum.Eta());
-    //    //If the particle is not in the eta gap of the timing detector or it was detected given the efficiency we update the error 
-    //    if(!(eta > fLowEtaRange && eta < fHighEtaRange) && (gRandom->Uniform(1.0) < fEfficiencyTiming)) { 
-    //        candidate->ErrorT = fTimeResolution * 1.0E3 * c_light;
-    //    }
-    //}
+    Candidate *theProp = static_cast<Candidate*>(candidate->Clone());
+    Candidate *prop = Propagate(theProp);
+    if(prop != NULL) {
+        Double_t eta = fabs(prop->Momentum.Eta()) ;
+        //If the particle is not in the eta gap of the timing detector or it was detected given the efficiency we update the error 
+        if(!(eta > fLowEtaRange && eta < fHighEtaRange) && (gRandom->Uniform(1.0) < fEfficiencyTiming)) { 
+            candidate->ErrorT = fTimeResolution * 1.0E3 * c_light;
+        }
+    }
     candidate->IsPU = 0;
     fParticleOutputArray->Add(candidate);
     if(TMath::Abs(candidate->Charge) >  1.0E-9 && sqrt(candidate->Position.X()*candidate->Position.X() + candidate->Position.Y()*candidate->Position.Y()) < 2)
@@ -224,10 +220,10 @@ void PileUpMerger::Process()
       //Added by Pablo
       nch++;
       sumpt2 += pt*pt;
-      vx += candidate->Position.X();
-      vy += candidate->Position.Y();
-      vt += (t + dt);
-      vz += (z + dz);
+      vx += pt*pt*candidate->Position.X();
+      vy += pt*pt*candidate->Position.Y();
+      vt += pt*pt*(t + dt2);
+      vz += pt*pt*(z + dz);
       vertex->AddCandidate(candidate);
     }
   }
@@ -235,10 +231,10 @@ void PileUpMerger::Process()
 
   if(nch > 0)
   {
-    vx /= nch;
-    vy /= nch;
-    vz /= nch;
-    vt /= nch;
+    vx /= sumpt2;
+    vy /= sumpt2;
+    vz /= sumpt2;
+    vt /= sumpt2;
   }
 
   nvtx++;
@@ -316,7 +312,7 @@ void PileUpMerger::Process()
 
       //=======================New Added by Pablo========================
       Double_t tf_smeared = gRandom->Gaus(0, fTimeResolution);
-      dt = dt + tf_smeared * 1.0E3*c_light;
+      Double_t dt2 = dt + tf_smeared * 1.0E3 * c_light;
  
       candidate->IsPU = 1;
 
@@ -329,48 +325,47 @@ void PileUpMerger::Process()
 
       x -= fInputBeamSpotX;
       y -= fInputBeamSpotY;
-      candidate->Position.SetXYZT(x, y, z + dz, t + dt);
+      candidate->Position.SetXYZT(x, y, z + dz, t + dt2);
       candidate->ErrorT = 200E-12 * 1.0E3 * c_light;
       //Propagate the particle to the timing detector geometry
-      //Candidate *prop = Propagate(candidate);
-      //Bool_t timeMeasurement = false;
-      //if(prop != NULL) { 
-      //    Double_t eta = fabs(prop->Momentum.Eta());
-      //    //If the particle is not in the eta gap of the timing detector or it was detected given the efficiency we update the error 
-      //    if(!(eta > fLowEtaRange && eta < fHighEtaRange) && (gRandom->Uniform(1.0) < fEfficiencyTiming)) { 
-      //      candidate->ErrorT = fTimeResolution * 1.0E3 * c_light;
-      //      timeMeasurement = true;
-      //    }
-      //}
+      Candidate *prop = Propagate(candidate);
+      Bool_t timeMeasurement = false;
+      if(prop != NULL) { 
+          Double_t eta = fabs(prop->Momentum.Eta());
+          //If the particle is not in the eta gap of the timing detector or it was detected given the efficiency we update the error 
+          if(!(eta > fLowEtaRange && eta < fHighEtaRange) && (gRandom->Uniform(1.0) < fEfficiencyTiming)) { 
+            candidate->ErrorT = fTimeResolution * 1.0E3 * c_light;
+            timeMeasurement = true;
+          }
+      }
        
       candidate->Position.RotateZ(dphi);
       candidate->Position += TLorentzVector(fOutputBeamSpotX, fOutputBeamSpotY, 0.0, 0.0);
 
       //If it's a charged particle, with a valid timeMeasurement, and outside a time window w.r.t. vertex
-      //if(timeMeasurement && TMath::Abs(candidate->Charge) >  1.0E-9 && TMath::Abs((t + dt) - vt_ref) > fTimeWindow * 1.0E3 * c_light) continue; 
+      if(timeMeasurement && TMath::Abs(candidate->Charge) >  1.0E-9 && TMath::Abs((t + dt2) - vt_ref) > fTimeWindow * 1.0E3 * c_light) continue; 
 
       ++numberOfParticles;
       if(TMath::Abs(candidate->Charge) >  1.0E-9 && sqrt(candidate->Position.X()*candidate->Position.X() + candidate->Position.Y()*candidate->Position.Y()) < 2)
       {
         nch++;
         sumpt2 += pt*pt;
-        vx += candidate->Position.X();
-        vy += candidate->Position.Y();
-        vz += (z + dz);
-        vt += (t + dt);
+        vx += pt*pt*candidate->Position.X();
+        vy += pt*pt*candidate->Position.Y();
+        vz += pt*pt*(z + dz);
+        vt += pt*pt*(t + dt2);
         vertex->AddCandidate(candidate);
       }
-
       fParticleOutputArray->Add(candidate);
     }
     //Added by Pablo: don't want to consider vertices where there are no charged particles. 
     if(nch == 0) continue;
     if(nch > 0)
     {
-      vx /= nch;
-      vy /= nch;
-      vz /= nch;
-      vt /= nch;
+      vx /= sumpt2;
+      vy /= sumpt2;
+      vz /= sumpt2;
+      vt /= sumpt2;
     }
 
     nvtx++;
