@@ -144,7 +144,9 @@ module PileUpMerger PileUpMerger {
   set LowEtaRange 1.5
   set HighEtaRange 1.7
   set EfficiencyTiming 1.0
-
+  set dtPileUp 90E-12
+  set dzPileUp 1.0
+ 
   # radius of the magnetic field coverage, in m
   set Radius 1.29
   # half-length of the magnetic field coverage, in m
@@ -158,11 +160,11 @@ module PileUpMerger PileUpMerger {
   set VertexOutputArray vertices
 
   # pre-generated minbias input file
-  #set PileUpFile /gpfs/users/parbol/delphes/MinBias_100k.pileup
+  set PileUpFile /gpfs/users/parbol/delphes/MinBias_100k.pileup
   #set PileUpFile MinBias.pileup
   
   # average expected pile up
-  set MeanPileUp 0
+  set MeanPileUp 200
 
   # maximum spread in the beam direction in m
   set ZVertexSpread 0.25
@@ -4108,7 +4110,7 @@ module TreeWriter TreeWriter {
 #add Branch InputArray BranchName BranchClass
 #add Branch Delphes/stableParticles Particle GenParticle
 add Branch PileUpMerger/vertices Vertex Vertex
-add Branch PileUpMerger/stableParticles Particle2 GenParticle
+#add Branch PileUpMerger/stableParticles Particle2 GenParticle
 #add Branch TimeSmearing/stableParticles MyParticle GenParticle
 #add Branch ParticlePropagator/stableParticles MyParticle2 GenParticle
 #add Branch ParticlePropagator/muons MyParticle2 Muon

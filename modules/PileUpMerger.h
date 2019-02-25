@@ -56,6 +56,8 @@ private:
   Double_t fEfficiencyTiming;
   Double_t fRadius, fRadius2, fRadiusMax, fHalfLength, fHalfLengthMax;
   Double_t fBz;
+  Double_t dzPileUp;
+  Double_t dtPileUp;
 
  
   Double_t fMeanPileUp;

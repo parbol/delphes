@@ -79,6 +79,8 @@ void PileUpMerger::Init()
   fLowEtaRange = GetDouble("LowEtaRange", 1.5);
   fHighEtaRange = GetDouble("HighEtaRange", 1.7);
   fEfficiencyTiming = GetDouble("EfficiencyTiming", 1.0);
+  dzPileUp = GetDouble("dzPileUp", 1.0);
+  dtPileUp = GetDouble("dtPileUp", 90E-12);
 
   fPileUpDistribution = GetInt("PileUpDistribution", 0);
 
@@ -179,10 +181,11 @@ void PileUpMerger::Process()
   factory = GetFactory();
   vertex = factory->NewCandidate();
 
-
   //while((candidate = static_cast<Candidate*>(fItInputArray->Next())) && (candidateSecond = static_cast<Candidate*>(fItInputArraySecond->Next())))
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
   {
+    x = candidate->Position.X();
+    y = candidate->Position.Y();
     z = candidate->Position.Z();
     t = candidate->Position.T();
     pt = candidate->Momentum.Pt();
@@ -199,12 +202,17 @@ void PileUpMerger::Process()
     
     //=======================New Added by Pablo========================
     Double_t tf_smeared = gRandom->Gaus(0, fTimeResolution);
+    Double_t dx2 = gRandom->Gaus(0, 0.020);
+    Double_t dy2 = gRandom->Gaus(0, 0.020);
+    Double_t dz2 = dz + gRandom->Gaus(0, 0.045);
     Double_t dt2 = dt + tf_smeared * 1.0E3 * c_light;
-    candidate->Position.SetZ(z + dz);
+    candidate->Position.SetX(x + dx2);
+    candidate->Position.SetY(y + dy2);
+    candidate->Position.SetZ(z + dz2);
     candidate->Position.SetT(t + dt2);
     candidate->ErrorT = 200E-12 * 1.0E3 * c_light;
     //Propagate the particle to the timing detector geometry
-    Candidate *theProp = static_cast<Candidate*>(candidate->Clone());
+    /*Candidate *theProp = static_cast<Candidate*>(candidate->Clone());
     Candidate *prop = Propagate(theProp);
     if(prop != NULL) {
         Double_t eta = fabs(prop->Momentum.Eta()) ;
@@ -213,6 +221,7 @@ void PileUpMerger::Process()
             candidate->ErrorT = fTimeResolution * 1.0E3 * c_light;
         }
     }
+    */
     candidate->IsPU = 0;
     fParticleOutputArray->Add(candidate);
     if(TMath::Abs(candidate->Charge) >  1.0E-9 && sqrt(candidate->Position.X()*candidate->Position.X() + candidate->Position.Y()*candidate->Position.Y()) < 2)
@@ -222,8 +231,8 @@ void PileUpMerger::Process()
       sumpt2 += pt*pt;
       vx += pt*pt*candidate->Position.X();
       vy += pt*pt*candidate->Position.Y();
-      vt += pt*pt*(t + dt2);
-      vz += pt*pt*(z + dz);
+      vz += pt*pt*candidate->Position.Z();
+      vt += pt*pt*candidate->Position.T();
       vertex->AddCandidate(candidate);
     }
   }
@@ -291,6 +300,7 @@ void PileUpMerger::Process()
     vx = 0.0;
     vy = 0.0;
     vz = 0.0;
+    vt = 0.0;
 
     numberOfParticles = 0;
     sumpt2 = 0.0;
@@ -312,8 +322,15 @@ void PileUpMerger::Process()
 
       //=======================New Added by Pablo========================
       Double_t tf_smeared = gRandom->Gaus(0, fTimeResolution);
+      Double_t dx2 = gRandom->Gaus(0, 0.020);
+      Double_t dy2 = gRandom->Gaus(0, 0.020);
+      Double_t dz2 = dz + gRandom->Gaus(0, 0.045);
       Double_t dt2 = dt + tf_smeared * 1.0E3 * c_light;
- 
+      candidate->Position.SetX(x + dx2);
+      candidate->Position.SetY(y + dy2);
+      candidate->Position.SetZ(z + dz2);
+      candidate->Position.SetT(t + dt2);
+     
       candidate->IsPU = 1;
 
       candidate->Momentum.SetPxPyPzE(px, py, pz, e);
@@ -325,36 +342,71 @@ void PileUpMerger::Process()
 
       x -= fInputBeamSpotX;
       y -= fInputBeamSpotY;
-      candidate->Position.SetXYZT(x, y, z + dz, t + dt2);
+      candidate->Position.SetXYZT(x+dx2, y+dy2, z + dz2, t + dt2);
       candidate->ErrorT = 200E-12 * 1.0E3 * c_light;
       //Propagate the particle to the timing detector geometry
-      Candidate *prop = Propagate(candidate);
+      /*Candidate *prop = Propagate(candidate);
       Bool_t timeMeasurement = false;
       if(prop != NULL) { 
           Double_t eta = fabs(prop->Momentum.Eta());
           //If the particle is not in the eta gap of the timing detector or it was detected given the efficiency we update the error 
           if(!(eta > fLowEtaRange && eta < fHighEtaRange) && (gRandom->Uniform(1.0) < fEfficiencyTiming)) { 
-            candidate->ErrorT = fTimeResolution * 1.0E3 * c_light;
-            timeMeasurement = true;
-          }
-      }
-       
-      candidate->Position.RotateZ(dphi);
-      candidate->Position += TLorentzVector(fOutputBeamSpotX, fOutputBeamSpotY, 0.0, 0.0);
+		    candidate->ErrorT = fTimeResolution * 1.0E3 * c_light;
+		    timeMeasurement = true;
+		  }
+	      }*/
+	       
+	      //candidate->Position.RotateZ(dphi);
+      //candidate->Position += TLorentzVector(fOutputBeamSpotX, fOutputBeamSpotY, 0.0, 0.0);
 
       //If it's a charged particle, with a valid timeMeasurement, and outside a time window w.r.t. vertex
-      if(timeMeasurement && TMath::Abs(candidate->Charge) >  1.0E-9 && TMath::Abs((t + dt2) - vt_ref) > fTimeWindow * 1.0E3 * c_light) continue; 
+      //if(timeMeasurement && TMath::Abs(candidate->Charge) >  1.0E-9 && TMath::Abs((t + dt2) - vt_ref) > fTimeWindow * 1.0E3 * c_light) continue; 
 
       ++numberOfParticles;
+      
+      /*if(TMath::Abs(candidate->Charge) >  1.0E-9 && sqrt(candidate->Position.X()*candidate->Position.X() + candidate->Position.Y()*candidate->Position.Y()) < 2)
+      { 
+            nch++;
+            sumpt2 += pt*pt;
+            vx += pt*pt*candidate->Position.X();
+            vy += pt*pt*candidate->Position.Y();
+            vz += pt*pt*(z + dz);
+            vt += pt*pt*(t + dt2);
+            vertex->AddCandidate(candidate);
+      }*/
       if(TMath::Abs(candidate->Charge) >  1.0E-9 && sqrt(candidate->Position.X()*candidate->Position.X() + candidate->Position.Y()*candidate->Position.Y()) < 2)
       {
-        nch++;
-        sumpt2 += pt*pt;
-        vx += pt*pt*candidate->Position.X();
-        vy += pt*pt*candidate->Position.Y();
-        vz += pt*pt*(z + dz);
-        vt += pt*pt*(t + dt2);
-        vertex->AddCandidate(candidate);
+        if( fabs(z+dz - ((Candidate *)fVertexOutputArray->At(0))->Position.Z()) < dzPileUp && fabs(t+dt2 - ((Candidate *)fVertexOutputArray->At(0))->Position.T()) < 1.0E3 * c_light * dtPileUp) {
+            float newsumpt2 = ((Candidate *)fVertexOutputArray->At(0))->SumPT2;
+	    float newvx = ((Candidate *)fVertexOutputArray->At(0))->SumPT2 * ((Candidate *)fVertexOutputArray->At(0))->Position.X();
+            float newvy = ((Candidate *)fVertexOutputArray->At(0))->SumPT2 * ((Candidate *)fVertexOutputArray->At(0))->Position.Y();
+            float newvz = ((Candidate *)fVertexOutputArray->At(0))->SumPT2 * ((Candidate *)fVertexOutputArray->At(0))->Position.Z();
+            float newvt = ((Candidate *)fVertexOutputArray->At(0))->SumPT2 * ((Candidate *)fVertexOutputArray->At(0))->Position.T();
+            newsumpt2 += pt*pt;
+            newvx += pt*pt* candidate->Position.X();
+            newvy += pt*pt* candidate->Position.Y();
+            newvz += pt*pt* (z+dz);
+            newvt += pt*pt* (t+dt);
+            newvx /= newsumpt2;
+            newvy /= newsumpt2;
+            newvz /= newsumpt2;
+            newvt /= newsumpt2;
+            int newnch = ((Candidate *)fVertexOutputArray->At(0))->ClusterNDF; 
+            newnch++;
+            ((Candidate *)fVertexOutputArray->At(0))->Position.SetXYZT(newvx, newvy, newvz, newvt);
+            ((Candidate *)fVertexOutputArray->At(0))->ClusterIndex = newnch;
+            ((Candidate *)fVertexOutputArray->At(0))->SumPT2 = newsumpt2;
+            ((Candidate *)fVertexOutputArray->At(0))->GenSumPT2 = newsumpt2;
+            ((Candidate *)fVertexOutputArray->At(0))->AddCandidate(candidate);
+        } else {         
+            nch++;
+            sumpt2 += pt*pt;
+            vx += pt*pt*candidate->Position.X();
+            vy += pt*pt*candidate->Position.Y();
+            vz += pt*pt*(z + dz);
+            vt += pt*pt*(t + dt2);
+            vertex->AddCandidate(candidate);
+        }
       }
       fParticleOutputArray->Add(candidate);
     }
@@ -369,22 +421,15 @@ void PileUpMerger::Process()
     }
 
     nvtx++;
-
     vertex->Position.SetXYZT(vx, vy, vz, vt);
-
     vertex->ClusterIndex = nvtx;
     vertex->ClusterNDF = nch;
     vertex->SumPT2 = sumpt2;
     vertex->GenSumPT2 = sumpt2;
-
     vertex->IsPU = 1;
-
     fVertexOutputArray->Add(vertex);
-
   }
 }
-
-
 
 Candidate *PileUpMerger::Propagate(Candidate *_particle)
 {

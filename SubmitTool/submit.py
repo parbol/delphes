@@ -94,7 +94,7 @@ def prepareJobCondorSubmitter(exeName, fileName, initevent, endevent, outputfile
 
 
 ##############################################################################################################################################
-def prepareJobCondor(exeName, fileName, initevent, endevent, outputfilename, logfilename, errfilename, jobname, cardLocation, cmsswrelease, launcher, queue, site):
+def prepareJobCondor(exeName, fileName, initevent, endevent, outputfilename, logfilename, errfilename, jobname, cardLocation, cmsswrelease, launcher, queue, site, tag):
 
     thisText = templateCONDOR
     thisText = thisText.replace('NAMEOFJOB', jobname)
@@ -106,13 +106,13 @@ def prepareJobCondor(exeName, fileName, initevent, endevent, outputfilename, log
     thisText = thisText.replace('LASTEVENT', str(endevent))
     thisText = thisText.replace('INPUT', fileName)
     
-    routput = open('submit_{0}.sh'.format(jobname), 'w')
+    routput = open('submit_{0}_{1}.sh'.format(tag, jobname), 'w')
     routput.write(thisText)
     routput.close()
-    os.chmod('submit_{0}.sh'.format(jobname), 0755) 
+    os.chmod('submit_{0}_{1}.sh'.format(tag, jobname), 0755) 
 
 ##############################################################################################################################################
-def prepareJob(exeName, fileName, initevent, endevent, outputfilename, logfilename, errfilename, jobname, cardLocation, cmsswrelease, launcher, queue, site):
+def prepareJob(exeName, fileName, initevent, endevent, outputfilename, logfilename, errfilename, jobname, cardLocation, cmsswrelease, launcher, queue, site, tag):
 
     thisText = templateLSF
     if site == 'ifca':
@@ -127,28 +127,28 @@ def prepareJob(exeName, fileName, initevent, endevent, outputfilename, logfilena
     thisText = thisText.replace('LASTEVENT', str(endevent))
     thisText = thisText.replace('INPUT', fileName)
     
-    routput = open('submit_{0}.sh'.format(jobname), 'w')
+    routput = open('submit_{0}_{1}.sh'.format(tag, jobname), 'w')
     routput.write(thisText)
     routput.close()
 
     script = open(launcher, 'a')
-    script.write('chmod +x submit_{0}.sh\n'.format(jobname))
+    script.write('chmod +x submit_{0}_{1}.sh\n'.format(tag, jobname))
     if logfilename == 'none' and errfilename == 'none':
         if site == 'ifca':
-            script.write('qsub submit_{0}.sh\n'.format(jobname))
+            script.write('qsub submit_{0}_{1}.sh\n'.format(tag, jobname))
         if site == 'lsflxplus':
-            script.write('bsub -q {0} submit_{1}.sh\n'.format(queue, jobname))
+            script.write('bsub -q {0} submit_{1}_ {2}.sh\n'.format(queue, tag, jobname))
     else:
         if site == 'ifca':
-            script.write('qsub -o {0} -e {1} submit_{2}.sh\n'.format(logfilename, errfilename, jobname))
+            script.write('qsub -o {0} -e {1} submit_{2}_{3}.sh\n'.format(logfilename, errfilename, tag, jobname))
         if site == 'lsflxplus':
-            script.write('bsub -o {0} -e {1} -q {2} submit_{3}.sh\n'.format(logfilename, errfilename, queue, jobname))
+            script.write('bsub -o {0} -e {1} -q {2} submit_{3}_{4}.sh\n'.format(logfilename, errfilename, queue, tag, jobname))
 
     script.close()
 
 
 ##############################################################################################################################################
-def prepareJobs(exeName, inputPath, fileName, numberOfEvents, outputDirectory, logLocation, eventsPerJob, cardLocation, cmsswrelease, launcher, queue, site):
+def prepareJobs(exeName, inputPath, fileName, numberOfEvents, outputDirectory, logLocation, eventsPerJob, cardLocation, cmsswrelease, launcher, queue, site, tag):
 
     nameTemplate = fileName[0:fileName.find('.root')]
     chunkCounter = 0
@@ -160,17 +160,17 @@ def prepareJobs(exeName, inputPath, fileName, numberOfEvents, outputDirectory, l
         endevent = (chunkCounter + 1) * eventsPerJob if (chunkCounter + 1) * eventsPerJob < numberOfEvents else numberOfEvents
         if site == 'ifca' or site == 'lsflxplus': 
             if logLocation == 'none':
-                prepareJob(exeName, inputfilename, initevent, endevent, outputfilename, 'none', 'none', jobname, cardLocation, cmsswrelease, launcher, queue, site)
+                prepareJob(exeName, inputfilename, initevent, endevent, outputfilename, 'none', 'none', jobname, cardLocation, cmsswrelease, launcher, queue, site, tag)
             else:
                 logfilename = '{0}/{1}_chunk{2}.log'.format(logLocation, nameTemplate, str(chunkCounter))
                 errfilename = '{0}/{1}_chunk{2}.err'.format(logLocation, nameTemplate, str(chunkCounter))
-                prepareJob(exeName, inputfilename, initevent, endevent, outputfilename, logfilename, errfilename, jobname, cardLocation, cmsswrelease, launcher, queue, site)
+                prepareJob(exeName, inputfilename, initevent, endevent, outputfilename, logfilename, errfilename, jobname, cardLocation, cmsswrelease, launcher, queue, site, tag)
             chunkCounter = chunkCounter + 1
         else:
-            prepareJobCondor(exeName, inputfilename, initevent, endevent, outputfilename, 'none', 'none', jobname, cardLocation, cmsswrelease, launcher, queue, site)
+            prepareJobCondor(exeName, inputfilename, initevent, endevent, outputfilename, 'none', 'none', jobname, cardLocation, cmsswrelease, launcher, queue, site, tag)
      
     if site == 'condor': 
-        prepareJobCondorSubmitter(exeName, inputfilename, initevent, endevent, outputfilename, 'none', 'none', jobname, cardLocation, cmsswrelease, launcher, queue, site, logLocation, nameTemplate)
+        prepareJobCondorSubmitter(exeName, inputfilename, initevent, endevent, outputfilename, 'none', 'none', jobname, cardLocation, cmsswrelease, launcher, queue, site, logLocation, nameTemplate, tag)
             
 
 
@@ -187,6 +187,7 @@ if __name__ == '__main__':
     parser.add_option('-m', '--launcher' , action='store', type='string', dest='launcher',        default='',     help='Name of launcherfile.')
     parser.add_option('-q', '--queue'    , action='store', type='string', dest='queue',           default='8nh',     help='Queue name.')
     parser.add_option('-s', '--site'     , action='store', type='string', dest='site',            default='lsf',     help='Running site: ifca, lsflxplus, condorlxplus.')
+    parser.add_option('-t', '--tag'      , action='store', type='string', dest='tag',             default='none',     help='Tag name:')
     (opts, args) = parser.parse_args()
 
     if not opts.launcher or not opts.eventsPerJob or not opts.outputDirectory or not opts.cardLocation or not opts.cmsswrelease or len(args) < 1 or not opts.site:
@@ -261,7 +262,7 @@ if __name__ == '__main__':
             continue
         numberOfEvents = tree.GetEntries()
         thefile.Close()
-        prepareJobs(exeName, inputPath, ji, numberOfEvents, outputDirectory, logLocation, eventsPerJob, cardLocation, cmsswrelease, launcher, queue, site)
+        prepareJobs(exeName, inputPath, ji, numberOfEvents, outputDirectory, logLocation, eventsPerJob, cardLocation, cmsswrelease, launcher, queue, site, tag)
         jcount = jcount + 1 
 
   
