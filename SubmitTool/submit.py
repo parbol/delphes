@@ -81,12 +81,12 @@ EXENAME CARD OUTPUT FIRSTEVENT LASTEVENT INPUT
 
 
 ##############################################################################################################################################
-def prepareJobCondorSubmitter(exeName, fileName, initevent, endevent, outputfilename, logfilename, errfilename, jobname, cardLocation, cmsswrelease, launcher, queue, site, logLocation, nameTemplate):
+def prepareJobCondorSubmitter(exeName, fileName, initevent, endevent, outputfilename, logfilename, errfilename, jobname, cardLocation, cmsswrelease, launcher, queue, site, logLocation, nameTemplate, tag):
 
     thisText = templateCONDORsub
     thisText = thisText.replace('LOGLOCATION', logLocation)
     thisText = thisText.replace('QUEUE', queue)
-    thisText = thisText.replace('NAMEOFFILES', 'submit_*sh')
+    thisText = thisText.replace('NAMEOFFILES', 'submit_{0}_*sh'.format(tag))
     
     routput = open(launcher, 'w')
     routput.write(thisText)
@@ -198,6 +198,8 @@ if __name__ == '__main__':
     queue = opts.queue
     site = opts.site
 
+
+    tag = opts.tag
     launcher = opts.launcher
     cardLocation = opts.cardLocation
     eventsPerJob = int(opts.eventsPerJob)

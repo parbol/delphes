@@ -160,7 +160,7 @@ module PileUpMerger PileUpMerger {
   set VertexOutputArray vertices
 
   # pre-generated minbias input file
-  set PileUpFile /gpfs/users/parbol/delphes/MinBias_100k.pileup
+  set PileUpFile /afs/cern.ch/work/p/pablom/private/delphes/NormalDelphes/delphes/MinBias_100k.pileup
   #set PileUpFile MinBias.pileup
   
   # average expected pile up
