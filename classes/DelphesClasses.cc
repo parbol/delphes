@@ -128,6 +128,8 @@ Candidate::Candidate() :
   DeltaEta(0.0), DeltaPhi(0.0),
   Momentum(0.0, 0.0, 0.0, 0.0),
   Position(0.0, 0.0, 0.0, 0.0),
+  PositionMTD(0.0, 0.0, 0.0, 0.0),
+  PositionECAL(0.0, 0.0, 0.0, 0.0),
   PositionError(0.0, 0.0, 0.0, 0.0),
   InitialPosition(0.0, 0.0, 0.0, 0.0),
   Area(0.0, 0.0, 0.0, 0.0),
@@ -292,6 +294,8 @@ void Candidate::Copy(TObject &obj) const
   object.Position = Position;
   object.InitialPosition = InitialPosition;
   object.PositionError = PositionError;
+  object.PositionMTD = PositionMTD;
+  object.PositionECAL = PositionECAL;
   object.Area = Area;
   object.L = L;
   object.ErrorT = ErrorT;
@@ -415,6 +419,8 @@ void Candidate::Clear(Option_t* option)
   DeltaPhi = 0.0;
   Momentum.SetXYZT(0.0, 0.0, 0.0, 0.0);
   Position.SetXYZT(0.0, 0.0, 0.0, 0.0);
+  PositionMTD.SetXYZT(0.0, 0.0, 0.0, 0.0);
+  PositionECAL.SetXYZT(0.0, 0.0, 0.0, 0.0);
   InitialPosition.SetXYZT(0.0, 0.0, 0.0, 0.0);
   Area.SetXYZT(0.0, 0.0, 0.0, 0.0);
   L = 0.0;

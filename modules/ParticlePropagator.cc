@@ -124,7 +124,7 @@ void ParticlePropagator::Finish()
 void ParticlePropagator::Process()
 {
   Candidate *candidate, *mother, *particle;
-  TLorentzVector particlePosition, particleMomentum, beamSpotPosition;
+  TLorentzVector particlePosition, particlePositionMTD, particlePositionECAL, particleMomentum, beamSpotPosition;
   Double_t px, py, pz, pt, pt2, e, q;
   Double_t x, y, z, t, r, phi;
   Double_t x_c, y_c, r_c, phi_c, phi_0;
@@ -168,6 +168,8 @@ void ParticlePropagator::Process()
 
     particlePosition = particle->Position;
     particleMomentum = particle->Momentum;
+    particlePositionMTD = particle->PositionMTD;
+    particlePositionECAL = particle->PositionECAL;
 
 
     x = particlePosition.X()*1.0E-3;
@@ -205,6 +207,8 @@ void ParticlePropagator::Process()
 
       candidate->InitialPosition = particlePosition;
       candidate->Position = particlePosition;
+      candidate->PositionMTD = particlePositionMTD;
+      candidate->PositionECAL = particlePositionECAL;
       candidate->L = 0.0;
 
       candidate->Momentum = particleMomentum;
@@ -249,6 +253,8 @@ void ParticlePropagator::Process()
 
       candidate->InitialPosition = particlePosition;
       candidate->Position.SetXYZT(x_t*1.0E3, y_t*1.0E3, z_t*1.0E3, particlePosition.T() + t*e*1.0E3);
+      candidate->PositionMTD = particlePositionMTD;
+      candidate->PositionECAL = particlePositionECAL;
       candidate->L = l*1.0E3;
 
       candidate->Momentum = particleMomentum;
@@ -395,6 +401,8 @@ void ParticlePropagator::Process()
 
         candidate->InitialPosition = particlePosition;
         candidate->Position.SetXYZT(x_t*1.0E3, y_t*1.0E3, z_t*1.0E3, particlePosition.T() + t*c_light*1.0E3);
+        candidate->PositionMTD = particlePositionMTD;
+        candidate->PositionECAL = particlePositionECAL;
 
         candidate->Momentum = particleMomentum;
 

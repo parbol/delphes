@@ -148,7 +148,7 @@ module PileUpMerger PileUpMerger {
   set dzPileUp 1.0
  
   # radius of the magnetic field coverage, in m
-  set Radius 1.29
+  set Radius 1.25
   # half-length of the magnetic field coverage, in m
   set HalfLength 3.0
 
@@ -160,7 +160,7 @@ module PileUpMerger PileUpMerger {
   set VertexOutputArray vertices
 
   # pre-generated minbias input file
-  set PileUpFile /afs/cern.ch/work/p/pablom/private/delphes/NormalDelphes/delphes/MinBias_100k.pileup
+  set PileUpFile /gpfs/users/parbol/delphes/MinBias_100k.pileup
   #set PileUpFile MinBias.pileup
   
   # average expected pile up

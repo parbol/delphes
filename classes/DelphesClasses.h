@@ -171,8 +171,18 @@ public:
   Float_t XOuter; // track position (x component) at the tracker edge
   Float_t YOuter; // track position (y component) at the tracker edge
   Float_t ZOuter; // track position (z component) at the tracker edge
+  
+ Float_t TMTD; // track position (t component) at the tracker edge
+  Float_t XMTD; // track position (x component) at the tracker edge
+  Float_t YMTD; // track position (y component) at the tracker edge
+  Float_t ZMTD; // track position (z component) at the tracker edge
+  
+  Float_t TECAL; // track position (t component) at the tracker edge
+  Float_t XECAL; // track position (x component) at the tracker edge
+  Float_t YECAL; // track position (y component) at the tracker edge
+  Float_t ZECAL; // track position (z component) at the tracker edge
 
-
+ 
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
 
@@ -282,6 +292,16 @@ public:
   Float_t ZOuter; //particle arrival time of flight
   Float_t TOuter; //particle arrival time of flight
 
+Float_t TMTD; // track position (t component) at the tracker edge
+  Float_t XMTD; // track position (x component) at the tracker edge
+  Float_t YMTD; // track position (y component) at the tracker edge
+  Float_t ZMTD; // track position (z component) at the tracker edge
+  
+  Float_t TECAL; // track position (t component) at the tracker edge
+  Float_t XECAL; // track position (x component) at the tracker edge
+  Float_t YECAL; // track position (y component) at the tracker edge
+  Float_t ZECAL; // track position (z component) at the tracker edge
+
  
 
   Float_t EhadOverEem; // ratio of the hadronic versus electromagnetic energy deposited in the calorimeter
@@ -324,6 +344,16 @@ public:
   Float_t YOuter; //particle arrival time of flight
   Float_t ZOuter; //particle arrival time of flight
   Float_t TOuter; //particle arrival time of flight
+Float_t TMTD; // track position (t component) at the tracker edge
+  Float_t XMTD; // track position (x component) at the tracker edge
+  Float_t YMTD; // track position (y component) at the tracker edge
+  Float_t ZMTD; // track position (z component) at the tracker edge
+  
+  Float_t TECAL; // track position (t component) at the tracker edge
+  Float_t XECAL; // track position (x component) at the tracker edge
+  Float_t YECAL; // track position (y component) at the tracker edge
+  Float_t ZECAL; // track position (z component) at the tracker edge
+
 
 
  
@@ -367,6 +397,16 @@ public:
   Float_t YOuter; //particle arrival time of flight
   Float_t ZOuter; //particle arrival time of flight
   Float_t TOuter; //particle arrival time of flight
+Float_t TMTD; // track position (t component) at the tracker edge
+  Float_t XMTD; // track position (x component) at the tracker edge
+  Float_t YMTD; // track position (y component) at the tracker edge
+  Float_t ZMTD; // track position (z component) at the tracker edge
+  
+  Float_t TECAL; // track position (t component) at the tracker edge
+  Float_t XECAL; // track position (x component) at the tracker edge
+  Float_t YECAL; // track position (y component) at the tracker edge
+  Float_t ZECAL; // track position (z component) at the tracker edge
+
 
 
   Int_t Charge; // muon charge
@@ -407,6 +447,16 @@ public:
   Float_t YOuter; //particle arrival time of flight
   Float_t ZOuter; //particle arrival time of flight
   Float_t TOuter; //particle arrival time of flight
+Float_t TMTD; // track position (t component) at the tracker edge
+  Float_t XMTD; // track position (x component) at the tracker edge
+  Float_t YMTD; // track position (y component) at the tracker edge
+  Float_t ZMTD; // track position (z component) at the tracker edge
+  
+  Float_t TECAL; // track position (t component) at the tracker edge
+  Float_t XECAL; // track position (x component) at the tracker edge
+  Float_t YECAL; // track position (y component) at the tracker edge
+  Float_t ZECAL; // track position (z component) at the tracker edge
+
 
   Float_t Mass; // jet invariant mass
 
@@ -495,6 +545,17 @@ public:
   Float_t XOuter; // track position (x component) at the tracker edge
   Float_t YOuter; // track position (y component) at the tracker edge
   Float_t ZOuter; // track position (z component) at the tracker edge
+
+  Float_t TMTD; // track position (t component) at the tracker edge
+  Float_t XMTD; // track position (x component) at the tracker edge
+  Float_t YMTD; // track position (y component) at the tracker edge
+  Float_t ZMTD; // track position (z component) at the tracker edge
+  
+  Float_t TECAL; // track position (t component) at the tracker edge
+  Float_t XECAL; // track position (x component) at the tracker edge
+  Float_t YECAL; // track position (y component) at the tracker edge
+  Float_t ZECAL; // track position (z component) at the tracker edge
+
 
   Float_t Xd; // X coordinate of point of closest approach to vertex
   Float_t Yd; // Y coordinate of point of closest approach to vertex
@@ -620,7 +681,7 @@ public:
   Float_t DeltaEta;
   Float_t DeltaPhi;
 
-  TLorentzVector Momentum, Position, InitialPosition, PositionError, Area;
+  TLorentzVector Momentum, Position, InitialPosition, PositionError, PositionMTD, PositionECAL, Area;
 
   Float_t L; // path length
   Float_t ErrorT; // path length

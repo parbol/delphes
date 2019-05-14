@@ -28,6 +28,7 @@
  */
 
 #include "classes/DelphesModule.h"
+#include "TLorentzVector.h"
 
 class TObjArray;
 class DelphesPileUpReader;
@@ -44,7 +45,7 @@ public:
   void Init();
   void Process();
   void Finish();
-  Candidate *Propagate(Candidate *);
+  TLorentzVector Propagate(Candidate *, int );
 
 private:
 

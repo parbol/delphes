@@ -185,6 +185,8 @@ void TreeWriter::ProcessParticles(ExRootTreeBranch *branch, TObjArray *array)
   {
     const TLorentzVector &momentum = candidate->Momentum;
     const TLorentzVector &position = candidate->Position;
+    const TLorentzVector &positionMTD = candidate->PositionMTD;
+    const TLorentzVector &positionECAL = candidate->PositionECAL;
     const TLorentzVector &initialPosition = candidate->InitialPosition;
 
     entry = static_cast<GenParticle*>(branch->NewEntry());
@@ -238,6 +240,17 @@ void TreeWriter::ProcessParticles(ExRootTreeBranch *branch, TObjArray *array)
     entry->YOuter = position.Y();
     entry->ZOuter = position.Z();
     entry->TOuter = position.T()*1.0E-3/c_light;
+    
+    entry->XMTD = positionMTD.X();
+    entry->YMTD = positionMTD.Y();
+    entry->ZMTD = positionMTD.Z();
+    entry->TMTD = positionMTD.T()*1.0E-3/c_light;
+    
+    entry->XECAL = positionECAL.X();
+    entry->YECAL = positionECAL.Y();
+    entry->ZECAL = positionECAL.Z();
+    entry->TECAL = positionECAL.T()*1.0E-3/c_light;
+    
     counter++;
   }
 }
@@ -332,6 +345,8 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, TObjArray *array)
   while((candidate = static_cast<Candidate*>(iterator.Next())))
   {
     const TLorentzVector &position = candidate->Position;
+    const TLorentzVector &positionMTD = candidate->PositionMTD;
+    const TLorentzVector &positionECAL = candidate->PositionECAL;
 
     cosTheta = TMath::Abs(position.CosTheta());
     signz = (position.Pz() >= 0.0) ? 1.0 : -1.0;
@@ -354,6 +369,16 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, TObjArray *array)
     entry->YOuter = position.Y();
     entry->ZOuter = position.Z();
     entry->TOuter = position.T()*1.0E-3/c_light;
+    entry->XMTD = positionMTD.X();
+    entry->YMTD = positionMTD.Y();
+    entry->ZMTD = positionMTD.Z();
+    entry->TMTD = positionMTD.T()*1.0E-3/c_light;
+    
+    entry->XECAL = positionECAL.X();
+    entry->YECAL = positionECAL.Y();
+    entry->ZECAL = positionECAL.Z();
+    entry->TECAL = positionECAL.T()*1.0E-3/c_light;
+    
 
     entry->L = candidate->L;
 
@@ -469,6 +494,8 @@ void TreeWriter::ProcessPhotons(ExRootTreeBranch *branch, TObjArray *array)
     TIter it1(candidate->GetCandidates());
     const TLorentzVector &momentum = candidate->Momentum;
     const TLorentzVector &position = candidate->Position;
+    const TLorentzVector &positionMTD = candidate->PositionMTD;
+    const TLorentzVector &positionECAL = candidate->PositionECAL;
     //Added by Pablo
     const TLorentzVector &initialPosition = candidate->InitialPosition;
 
@@ -493,6 +520,16 @@ void TreeWriter::ProcessPhotons(ExRootTreeBranch *branch, TObjArray *array)
     entry->YOuter = position.Y();
     entry->ZOuter = position.Z();
     entry->TOuter = position.T()*1.0E-3/c_light;
+    entry->XMTD = positionMTD.X();
+    entry->YMTD = positionMTD.Y();
+    entry->ZMTD = positionMTD.Z();
+    entry->TMTD = positionMTD.T()*1.0E-3/c_light;
+    
+    entry->XECAL = positionECAL.X();
+    entry->YECAL = positionECAL.Y();
+    entry->ZECAL = positionECAL.Z();
+    entry->TECAL = positionECAL.T()*1.0E-3/c_light;
+    
 
 
     // Isolation variables
@@ -531,6 +568,8 @@ void TreeWriter::ProcessElectrons(ExRootTreeBranch *branch, TObjArray *array)
   {
     const TLorentzVector &momentum = candidate->Momentum;
     const TLorentzVector &position = candidate->Position;
+    const TLorentzVector &positionMTD = candidate->PositionMTD;
+    const TLorentzVector &positionECAL = candidate->PositionECAL;
     //Added by Pablo
     const TLorentzVector &initialPosition = candidate->InitialPosition;
 
@@ -555,6 +594,16 @@ void TreeWriter::ProcessElectrons(ExRootTreeBranch *branch, TObjArray *array)
     entry->YOuter = position.Y();
     entry->ZOuter = position.Z();
     entry->TOuter = position.T()*1.0E-3/c_light;
+    entry->XMTD = positionMTD.X();
+    entry->YMTD = positionMTD.Y();
+    entry->ZMTD = positionMTD.Z();
+    entry->TMTD = positionMTD.T()*1.0E-3/c_light;
+    
+    entry->XECAL = positionECAL.X();
+    entry->YECAL = positionECAL.Y();
+    entry->ZECAL = positionECAL.Z();
+    entry->TECAL = positionECAL.T()*1.0E-3/c_light;
+    
 
     // Isolation variables
 
@@ -593,6 +642,8 @@ void TreeWriter::ProcessMuons(ExRootTreeBranch *branch, TObjArray *array)
   {
     const TLorentzVector &momentum = candidate->Momentum;
     const TLorentzVector &position = candidate->Position;
+    const TLorentzVector &positionMTD = candidate->PositionMTD;
+    const TLorentzVector &positionECAL = candidate->PositionECAL;
     //Added by Pablo
     const TLorentzVector &initialPosition = candidate->InitialPosition;
 
@@ -620,6 +671,16 @@ void TreeWriter::ProcessMuons(ExRootTreeBranch *branch, TObjArray *array)
     entry->YOuter = position.Y();
     entry->ZOuter = position.Z();
     entry->TOuter = position.T()*1.0E-3/c_light;
+    entry->XMTD = positionMTD.X();
+    entry->YMTD = positionMTD.Y();
+    entry->ZMTD = positionMTD.Z();
+    entry->TMTD = positionMTD.T()*1.0E-3/c_light;
+    
+    entry->XECAL = positionECAL.X();
+    entry->YECAL = positionECAL.Y();
+    entry->ZECAL = positionECAL.Z();
+    entry->TECAL = positionECAL.T()*1.0E-3/c_light;
+    
 
     // Isolation variables
 
@@ -659,6 +720,8 @@ void TreeWriter::ProcessJets(ExRootTreeBranch *branch, TObjArray *array)
 
     const TLorentzVector &momentum = candidate->Momentum;
     const TLorentzVector &position = candidate->Position;
+    const TLorentzVector &positionMTD = candidate->PositionMTD;
+    const TLorentzVector &positionECAL = candidate->PositionECAL;
     //Added by Pablo
     const TLorentzVector &initialPosition = candidate->InitialPosition;
 
@@ -683,6 +746,16 @@ void TreeWriter::ProcessJets(ExRootTreeBranch *branch, TObjArray *array)
     entry->YOuter = position.Y();
     entry->ZOuter = position.Z();
     entry->TOuter = position.T()*1.0E-3/c_light;
+    entry->XMTD = positionMTD.X();
+    entry->YMTD = positionMTD.Y();
+    entry->ZMTD = positionMTD.Z();
+    entry->TMTD = positionMTD.T()*1.0E-3/c_light;
+    
+    entry->XECAL = positionECAL.X();
+    entry->YECAL = positionECAL.Y();
+    entry->ZECAL = positionECAL.Z();
+    entry->TECAL = positionECAL.T()*1.0E-3/c_light;
+    
 
 
     entry->Mass = momentum.M();

@@ -201,27 +201,31 @@ void PileUpMerger::Process()
     //=================================================================
     
     //=======================New Added by Pablo========================
+    //MTD
     Double_t tf_smeared = gRandom->Gaus(0, fTimeResolution);
+    //ECAL
+    Double_t tf_smeared_ECAL = gRandom->Gaus(0, 100.0e-12);
     Double_t dx2 = gRandom->Gaus(0, 0.020);
     Double_t dy2 = gRandom->Gaus(0, 0.020);
     Double_t dz2 = dz + gRandom->Gaus(0, 0.045);
     Double_t dt2 = dt + tf_smeared * 1.0E3 * c_light;
+    Double_t dt2ecal = dt + tf_smeared_ECAL * 1.0E3 * c_light;
     candidate->Position.SetX(x + dx2);
     candidate->Position.SetY(y + dy2);
     candidate->Position.SetZ(z + dz2);
     candidate->Position.SetT(t + dt2);
-    candidate->ErrorT = 200E-12 * 1.0E3 * c_light;
+    candidate->ErrorT = fTimeResolution * 1.0E3 * c_light;
+
     //Propagate the particle to the timing detector geometry
-    /*Candidate *theProp = static_cast<Candidate*>(candidate->Clone());
-    Candidate *prop = Propagate(theProp);
-    if(prop != NULL) {
-        Double_t eta = fabs(prop->Momentum.Eta()) ;
-        //If the particle is not in the eta gap of the timing detector or it was detected given the efficiency we update the error 
-        if(!(eta > fLowEtaRange && eta < fHighEtaRange) && (gRandom->Uniform(1.0) < fEfficiencyTiming)) { 
-            candidate->ErrorT = fTimeResolution * 1.0E3 * c_light;
-        }
-    }
-    */
+    //This is propagated to the MTD
+    Candidate *theProp = static_cast<Candidate*>(candidate->Clone());
+    candidate->PositionMTD = Propagate(theProp, 1);
+
+    //This will be propagated to the ECAL
+    Candidate *theProp2 = static_cast<Candidate*>(candidate->Clone());
+    theProp2->Position.SetT(t + dt2ecal);
+    candidate->PositionECAL = Propagate(theProp2, 1);
+
     candidate->IsPU = 0;
     fParticleOutputArray->Add(candidate);
     if(TMath::Abs(candidate->Charge) >  1.0E-9 && sqrt(candidate->Position.X()*candidate->Position.X() + candidate->Position.Y()*candidate->Position.Y()) < 2)
@@ -322,28 +326,52 @@ void PileUpMerger::Process()
 
       //=======================New Added by Pablo========================
       Double_t tf_smeared = gRandom->Gaus(0, fTimeResolution);
+      Double_t tf_smeared_ECAL = gRandom->Gaus(0, 100.0e-12);
       Double_t dx2 = gRandom->Gaus(0, 0.020);
       Double_t dy2 = gRandom->Gaus(0, 0.020);
       Double_t dz2 = dz + gRandom->Gaus(0, 0.045);
       Double_t dt2 = dt + tf_smeared * 1.0E3 * c_light;
+      Double_t dt2ecal = dt + tf_smeared_ECAL * 1.0E3 * c_light;
       candidate->Position.SetX(x + dx2);
       candidate->Position.SetY(y + dy2);
       candidate->Position.SetZ(z + dz2);
       candidate->Position.SetT(t + dt2);
-     
-      candidate->IsPU = 1;
-
+      
       candidate->Momentum.SetPxPyPzE(px, py, pz, e);
       candidate->Momentum.RotateZ(dphi);
+    
+      //Propagate the particle to the timing detector geometry
+      //This is propagated to the MTD
+      //std::cout << "Pileup goin" << std::endl;
+      TLorentzVector zero(0, 0, 0 , 0);
       
-      Candidate *theProp = static_cast<Candidate*>(candidate->Clone());
-      Candidate *extParticle = Propagate(theProp);
+      Candidate *theProppu = static_cast<Candidate*>(candidate->Clone());
+      candidate->PositionMTD = Propagate(theProppu, 0);
+
+      Candidate *theProp2pu = static_cast<Candidate*>(candidate->Clone());
+      theProp2pu->Position.SetT(t + dt2ecal);
+      candidate->PositionECAL = Propagate(theProp2pu, 1);
+
+      /*Candidate *prop2pu = Propagate(theProp2pu, 1);
+      if(proppu != NULL) {
+      } else {
+          candidate->PositionMTD = zero;
+      }
+      if(prop2pu != NULL) {
+      } else {
+          candidate->PositionECAL = zero;
+      }
+      delete prop2pu;
+      delete proppu;
+      //std::cout << "Pileup goout" << std::endl;
+      */ 
+     candidate->IsPU = 1;
+ 
+      
       pt = candidate->Momentum.Pt();
 
       x -= fInputBeamSpotX;
       y -= fInputBeamSpotY;
-      candidate->Position.SetXYZT(x+dx2, y+dy2, z + dz2, t + dt2);
-      candidate->ErrorT = 200E-12 * 1.0E3 * c_light;
       //Propagate the particle to the timing detector geometry
       /*Candidate *prop = Propagate(candidate);
       Bool_t timeMeasurement = false;
@@ -431,7 +459,7 @@ void PileUpMerger::Process()
   }
 }
 
-Candidate *PileUpMerger::Propagate(Candidate *_particle)
+TLorentzVector PileUpMerger::Propagate(Candidate *_particle, int det)
 {
   Candidate *candidate, *mother, *particle;
   TLorentzVector particlePosition, particleMomentum, beamSpotPosition;
@@ -446,6 +474,7 @@ Candidate *PileUpMerger::Propagate(Candidate *_particle)
   Double_t rcu, rc2, xd, yd, zd;
   Double_t l, d0, dz, p, ctgTheta, phip, etap, alpha;
   Double_t bsx, bsy, bsz;
+  Double_t thefRadius, thefHalfLength;
 
   const Double_t c_light = 2.99792458E8;
 
@@ -468,7 +497,8 @@ Candidate *PileUpMerger::Propagate(Candidate *_particle)
   // check that particle position is inside the cylinder
   if(TMath::Hypot(x, y) > fRadiusMax || TMath::Abs(z) > fHalfLengthMax)
   {
-    return NULL;
+    TLorentzVector a(0, 0, 0, 0);
+    return a;
   }
 
   px = particleMomentum.Px();
@@ -480,31 +510,33 @@ Candidate *PileUpMerger::Propagate(Candidate *_particle)
 
   if(pt2 < 1.0E-9)
   {
-    return NULL;
+    TLorentzVector a(0, 0, 0, 0);
+    return a;
   }
 
-  if(TMath::Hypot(x, y) > fRadius || TMath::Abs(z) > fHalfLength)
-  {
-    mother = candidate;
-    candidate = static_cast<Candidate*>(candidate->Clone());
-    candidate->InitialPosition = particlePosition;
-    candidate->Position = particlePosition;
-    candidate->L = 0.0;
+  if(det == 0) { 
+      thefRadius = fRadius;
+      thefHalfLength = fHalfLength;
+  } else {  
+      thefRadius = 1.29;
+      thefHalfLength = 3.14;
+  }
 
-    candidate->Momentum = particleMomentum;
-    candidate->AddCandidate(mother);
-    return candidate;
+  if(TMath::Hypot(x, y) > thefRadius || TMath::Abs(z) > thefHalfLength)
+  {
+    return particlePosition;
   }
   else if(TMath::Abs(q) < 1.0E-9 || TMath::Abs(fBz) < 1.0E-9)
   {
-    // solve pt2*t^2 + 2*(px*x + py*y)*t - (fRadius2 - x*x - y*y) = 0
+    // solve pt2*t^2 + 2*(px*x + py*y)*t - (thefRadius2 - x*x - y*y) = 0
     tmp = px*y - py*x;
-    discr2 = pt2*fRadius2 - tmp*tmp;
+    discr2 = pt2*thefRadius*thefRadius - tmp*tmp;
 
     if(discr2 < 0.0)
     {
       // no solutions
-      return NULL;
+      TLorentzVector a(0, 0, 0, 0);
+      return a;
     }
 
     tmp = px*x + py*y;
@@ -514,10 +546,10 @@ Candidate *PileUpMerger::Propagate(Candidate *_particle)
     t = (t1 < 0.0) ? t2 : t1;
 
     z_t = z + pz*t;
-    if(TMath::Abs(z_t) > fHalfLength)
+    if(TMath::Abs(z_t) > thefHalfLength)
 	    {
-      t3 = (+fHalfLength - z) / pz;
-      t4 = (-fHalfLength - z) / pz;
+      t3 = (+thefHalfLength - z) / pz;
+      t4 = (-thefHalfLength - z) / pz;
       t = (t3 < 0.0) ? t4 : t3;
     }
 
@@ -526,18 +558,11 @@ Candidate *PileUpMerger::Propagate(Candidate *_particle)
     z_t = z + pz*t;
 
     l = TMath::Sqrt( (x_t - x)*(x_t - x) + (y_t - y)*(y_t - y) + (z_t - z)*(z_t - z));
+    
+    TLorentzVector thePosition;
+    thePosition.SetXYZT(x_t*1.0E3, y_t*1.0E3, z_t*1.0E3, particlePosition.T() + t*e*1.0E3);
 
-    mother = candidate;
-    candidate = static_cast<Candidate*>(candidate->Clone());
-
-    candidate->InitialPosition = particlePosition;
-    candidate->Position.SetXYZT(x_t*1.0E3, y_t*1.0E3, z_t*1.0E3, particlePosition.T() + t*e*1.0E3);
-    candidate->L = l*1.0E3;
-
-    candidate->Momentum = particleMomentum;
-    candidate->AddCandidate(mother);
-
-    return candidate;
+    return thePosition;
   }
   else
   {
@@ -596,16 +621,16 @@ Candidate *PileUpMerger::Propagate(Candidate *_particle)
     t_r = 0.0; // in [ns]
     int sign_pz = (pz > 0.0) ? 1 : -1;
     if(pz == 0.0) t_z = 1.0E99;
-    else t_z = gammam / (pz*1.0E9/c_light) * (-z + fHalfLength*sign_pz);
+    else t_z = gammam / (pz*1.0E9/c_light) * (-z + thefHalfLength*sign_pz);
 
-    if(r_c + TMath::Abs(r)  < fRadius)
+    if(r_c + TMath::Abs(r)  < thefRadius)
     {
       // helix does not cross the cylinder sides
       t = t_z;
     }
     else
     {
-      asinrho = TMath::ASin((fRadius*fRadius - r_c*r_c - r*r) / (2*TMath::Abs(r)*r_c));
+      asinrho = TMath::ASin((thefRadius*thefRadius - r_c*r_c - r*r) / (2*TMath::Abs(r)*r_c));
       delta = phi_0 - phi;
       if(delta <-TMath::Pi()) delta += 2*TMath::Pi();
       if(delta > TMath::Pi()) delta -= 2*TMath::Pi();
@@ -655,23 +680,10 @@ Candidate *PileUpMerger::Propagate(Candidate *_particle)
         particle->Phi = phip;
       }
 
-      mother = candidate;
-      candidate = static_cast<Candidate*>(candidate->Clone());
+      TLorentzVector thePosition;
+      thePosition.SetXYZT(x_t*1.0E3, y_t*1.0E3, z_t*1.0E3, particlePosition.T() + t*c_light*1.0E3);
 
-      candidate->InitialPosition = particlePosition;
-      candidate->Position.SetXYZT(x_t*1.0E3, y_t*1.0E3, z_t*1.0E3, particlePosition.T() + t*c_light*1.0E3);
-
-      candidate->Momentum = particleMomentum;
-
-      candidate->L = l*1.0E3;
-
-      candidate->Xd = xd*1.0E3;
-      candidate->Yd = yd*1.0E3;
-      candidate->Zd = zd*1.0E3;
-
-      candidate->AddCandidate(mother);
-
-      return candidate;
+      return thePosition;
     }
   }
 }
