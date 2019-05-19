@@ -55,11 +55,12 @@ private:
   Double_t fLowEtaRange;
   Double_t fHighEtaRange;
   Double_t fEfficiencyTiming;
-  Double_t fRadius, fRadius2, fRadiusMax, fHalfLength, fHalfLengthMax;
+  Double_t fRadius, fRadiusECAL, fRadius2, fRadiusMax, fHalfLength, fHalfLengthECAL, fHalfLengthMax;
   Double_t fBz;
   Double_t dzPileUp;
   Double_t dtPileUp;
-
+  Double_t fTimeNECAL;
+  Double_t fTimeCECAL;
  
   Double_t fMeanPileUp;
   Double_t fZVertexSpread;

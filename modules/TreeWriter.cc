@@ -245,11 +245,13 @@ void TreeWriter::ProcessParticles(ExRootTreeBranch *branch, TObjArray *array)
     entry->YMTD = positionMTD.Y();
     entry->ZMTD = positionMTD.Z();
     entry->TMTD = positionMTD.T()*1.0E-3/c_light;
+    entry->ErrorTMTD = candidate->ErrorTMTD * 1.0E-3/c_light;
     
     entry->XECAL = positionECAL.X();
     entry->YECAL = positionECAL.Y();
     entry->ZECAL = positionECAL.Z();
     entry->TECAL = positionECAL.T()*1.0E-3/c_light;
+    entry->ErrorTECAL = candidate->ErrorTECAL * 1.0E-3/c_light;
     
     counter++;
   }
@@ -373,11 +375,13 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, TObjArray *array)
     entry->YMTD = positionMTD.Y();
     entry->ZMTD = positionMTD.Z();
     entry->TMTD = positionMTD.T()*1.0E-3/c_light;
+    entry->ErrorTMTD = candidate->ErrorTMTD * 1.0E-3/c_light;
     
     entry->XECAL = positionECAL.X();
     entry->YECAL = positionECAL.Y();
     entry->ZECAL = positionECAL.Z();
     entry->TECAL = positionECAL.T()*1.0E-3/c_light;
+    entry->ErrorTECAL = candidate->ErrorTECAL * 1.0E-3/c_light;
     
 
     entry->L = candidate->L;
@@ -524,11 +528,13 @@ void TreeWriter::ProcessPhotons(ExRootTreeBranch *branch, TObjArray *array)
     entry->YMTD = positionMTD.Y();
     entry->ZMTD = positionMTD.Z();
     entry->TMTD = positionMTD.T()*1.0E-3/c_light;
+    entry->ErrorTMTD = candidate->ErrorTMTD * 1.0E-3/c_light;
     
     entry->XECAL = positionECAL.X();
     entry->YECAL = positionECAL.Y();
     entry->ZECAL = positionECAL.Z();
     entry->TECAL = positionECAL.T()*1.0E-3/c_light;
+    entry->ErrorTECAL = candidate->ErrorTECAL * 1.0E-3/c_light;
     
 
 
@@ -598,11 +604,13 @@ void TreeWriter::ProcessElectrons(ExRootTreeBranch *branch, TObjArray *array)
     entry->YMTD = positionMTD.Y();
     entry->ZMTD = positionMTD.Z();
     entry->TMTD = positionMTD.T()*1.0E-3/c_light;
+    entry->ErrorTMTD = candidate->ErrorTMTD * 1.0E-3/c_light;
     
     entry->XECAL = positionECAL.X();
     entry->YECAL = positionECAL.Y();
     entry->ZECAL = positionECAL.Z();
     entry->TECAL = positionECAL.T()*1.0E-3/c_light;
+    entry->ErrorTECAL = candidate->ErrorTECAL * 1.0E-3/c_light;
     
 
     // Isolation variables
@@ -675,11 +683,13 @@ void TreeWriter::ProcessMuons(ExRootTreeBranch *branch, TObjArray *array)
     entry->YMTD = positionMTD.Y();
     entry->ZMTD = positionMTD.Z();
     entry->TMTD = positionMTD.T()*1.0E-3/c_light;
+    entry->ErrorTMTD = candidate->ErrorTMTD * 1.0E-3/c_light;
     
     entry->XECAL = positionECAL.X();
     entry->YECAL = positionECAL.Y();
     entry->ZECAL = positionECAL.Z();
     entry->TECAL = positionECAL.T()*1.0E-3/c_light;
+    entry->ErrorTECAL = candidate->ErrorTECAL * 1.0E-3/c_light;
     
 
     // Isolation variables
@@ -750,11 +760,13 @@ void TreeWriter::ProcessJets(ExRootTreeBranch *branch, TObjArray *array)
     entry->YMTD = positionMTD.Y();
     entry->ZMTD = positionMTD.Z();
     entry->TMTD = positionMTD.T()*1.0E-3/c_light;
+    entry->ErrorTMTD = candidate->ErrorTMTD * 1.0E-3/c_light;
     
     entry->XECAL = positionECAL.X();
     entry->YECAL = positionECAL.Y();
     entry->ZECAL = positionECAL.Z();
     entry->TECAL = positionECAL.T()*1.0E-3/c_light;
+    entry->ErrorTECAL = candidate->ErrorTECAL * 1.0E-3/c_light;
     
 
 

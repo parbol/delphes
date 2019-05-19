@@ -81,14 +81,18 @@ void PileUpMerger::Init()
   fEfficiencyTiming = GetDouble("EfficiencyTiming", 1.0);
   dzPileUp = GetDouble("dzPileUp", 1.0);
   dtPileUp = GetDouble("dtPileUp", 90E-12);
+  fTimeNECAL = GetDouble("fTimeNECAL", 61.7*100.0);
+  fTimeCECAL = GetDouble("fTimeCECAL", 17.9);
 
   fPileUpDistribution = GetInt("PileUpDistribution", 0);
 
   fMeanPileUp  = GetDouble("MeanPileUp", 10);
   
   fRadius = GetDouble("Radius", 1.0);
+  fRadiusECAL = GetDouble("RadiusECAL", 1.29);
   fRadius2 = fRadius*fRadius;
   fHalfLength = GetDouble("HalfLength", 3.0);
+  fHalfLengthECAL = GetDouble("HalfLengthECAL", 3.14);
   fBz = GetDouble("Bz", 0.0);
   if(fRadius < 1.0E-2)
   {
@@ -190,36 +194,30 @@ void PileUpMerger::Process()
     t = candidate->Position.T();
     pt = candidate->Momentum.Pt();
 
-    //===========================Original===============================
-    //if (dz0 < -999999.0)
-    //  dz0 = z;
-    //if (dt0 < -999999.0)
-    //  dt0 = t;
-    //// cancel any possible offset in position and time the input file
-    //candidate->Position.SetZ(z - dz0 + dz);
-    //candidate->Position.SetT(t - dt0 + dt);
-    //=================================================================
-    
-    //=======================New Added by Pablo========================
-    //MTD
+    //MTD Time Resolution
     Double_t tf_smeared = gRandom->Gaus(0, fTimeResolution);
-    //ECAL
-    Double_t tf_smeared_ECAL = gRandom->Gaus(0, 100.0e-12);
+    Double_t dt2 = dt + tf_smeared * 1.0E3 * c_light;
+    candidate->ErrorT = fTimeResolution * 1.0E3 * c_light;
+    candidate->ErrorTMTD = fTimeResolution * 1.0E3 * c_light;
+    //ECAL Time Resolution
+    Double_t AoverSigma = (240.0/25.0) * candidate->Momentum.E(); 
+    Double_t resolution = sqrt((fTimeNECAL/AoverSigma) * (fTimeNECAL/AoverSigma) + fTimeCECAL * fTimeCECAL);
+    Double_t tf_smeared_ECAL = gRandom->Gaus(0, resolution);
+    Double_t dt2ecal = dt + tf_smeared_ECAL * 1.0E3 * c_light;
+    candidate->ErrorTECAL = resolution * 1.0E3 * c_light;
+    //Resolution of spatial tracking
     Double_t dx2 = gRandom->Gaus(0, 0.020);
     Double_t dy2 = gRandom->Gaus(0, 0.020);
     Double_t dz2 = dz + gRandom->Gaus(0, 0.045);
-    Double_t dt2 = dt + tf_smeared * 1.0E3 * c_light;
-    Double_t dt2ecal = dt + tf_smeared_ECAL * 1.0E3 * c_light;
     candidate->Position.SetX(x + dx2);
     candidate->Position.SetY(y + dy2);
     candidate->Position.SetZ(z + dz2);
     candidate->Position.SetT(t + dt2);
-    candidate->ErrorT = fTimeResolution * 1.0E3 * c_light;
-
+ 
     //Propagate the particle to the timing detector geometry
     //This is propagated to the MTD
     Candidate *theProp = static_cast<Candidate*>(candidate->Clone());
-    candidate->PositionMTD = Propagate(theProp, 1);
+    candidate->PositionMTD = Propagate(theProp, 0);
 
     //This will be propagated to the ECAL
     Candidate *theProp2 = static_cast<Candidate*>(candidate->Clone());
@@ -325,13 +323,21 @@ void PileUpMerger::Process()
       candidate->Mass = pdgParticle ? pdgParticle->Mass() : -999.9;
 
       //=======================New Added by Pablo========================
+      //MTD Time Resolution
       Double_t tf_smeared = gRandom->Gaus(0, fTimeResolution);
-      Double_t tf_smeared_ECAL = gRandom->Gaus(0, 100.0e-12);
+      Double_t dt2 = dt + tf_smeared * 1.0E3 * c_light;
+      candidate->ErrorT = fTimeResolution * 1.0E3 * c_light;
+      candidate->ErrorTMTD = fTimeResolution * 1.0E3 * c_light;
+      //ECAL Time Resolution
+      Double_t AoverSigma = (240.0/25.0) * candidate->Momentum.E(); 
+      Double_t resolution = sqrt((fTimeNECAL/AoverSigma) * (fTimeNECAL/AoverSigma) + fTimeCECAL * fTimeCECAL);
+      Double_t tf_smeared_ECAL = gRandom->Gaus(0, resolution);
+      Double_t dt2ecal = dt + tf_smeared_ECAL * 1.0E3 * c_light;
+      candidate->ErrorTECAL = resolution * 1.0E3 * c_light;
+      //Resolution of spatial tracking
       Double_t dx2 = gRandom->Gaus(0, 0.020);
       Double_t dy2 = gRandom->Gaus(0, 0.020);
       Double_t dz2 = dz + gRandom->Gaus(0, 0.045);
-      Double_t dt2 = dt + tf_smeared * 1.0E3 * c_light;
-      Double_t dt2ecal = dt + tf_smeared_ECAL * 1.0E3 * c_light;
       candidate->Position.SetX(x + dx2);
       candidate->Position.SetY(y + dy2);
       candidate->Position.SetZ(z + dz2);
@@ -339,11 +345,6 @@ void PileUpMerger::Process()
       
       candidate->Momentum.SetPxPyPzE(px, py, pz, e);
       candidate->Momentum.RotateZ(dphi);
-    
-      //Propagate the particle to the timing detector geometry
-      //This is propagated to the MTD
-      //std::cout << "Pileup goin" << std::endl;
-      TLorentzVector zero(0, 0, 0 , 0);
       
       Candidate *theProppu = static_cast<Candidate*>(candidate->Clone());
       candidate->PositionMTD = Propagate(theProppu, 0);
@@ -352,56 +353,16 @@ void PileUpMerger::Process()
       theProp2pu->Position.SetT(t + dt2ecal);
       candidate->PositionECAL = Propagate(theProp2pu, 1);
 
-      /*Candidate *prop2pu = Propagate(theProp2pu, 1);
-      if(proppu != NULL) {
-      } else {
-          candidate->PositionMTD = zero;
-      }
-      if(prop2pu != NULL) {
-      } else {
-          candidate->PositionECAL = zero;
-      }
-      delete prop2pu;
-      delete proppu;
-      //std::cout << "Pileup goout" << std::endl;
-      */ 
-     candidate->IsPU = 1;
+      candidate->IsPU = 1;
  
       
       pt = candidate->Momentum.Pt();
 
       x -= fInputBeamSpotX;
       y -= fInputBeamSpotY;
-      //Propagate the particle to the timing detector geometry
-      /*Candidate *prop = Propagate(candidate);
-      Bool_t timeMeasurement = false;
-      if(prop != NULL) { 
-          Double_t eta = fabs(prop->Momentum.Eta());
-          //If the particle is not in the eta gap of the timing detector or it was detected given the efficiency we update the error 
-          if(!(eta > fLowEtaRange && eta < fHighEtaRange) && (gRandom->Uniform(1.0) < fEfficiencyTiming)) { 
-		    candidate->ErrorT = fTimeResolution * 1.0E3 * c_light;
-		    timeMeasurement = true;
-		  }
-	      }*/
-	       
-	      //candidate->Position.RotateZ(dphi);
-      //candidate->Position += TLorentzVector(fOutputBeamSpotX, fOutputBeamSpotY, 0.0, 0.0);
-
-      //If it's a charged particle, with a valid timeMeasurement, and outside a time window w.r.t. vertex
-      //if(timeMeasurement && TMath::Abs(candidate->Charge) >  1.0E-9 && TMath::Abs((t + dt2) - vt_ref) > fTimeWindow * 1.0E3 * c_light) continue; 
 
       ++numberOfParticles;
       
-      /*if(TMath::Abs(candidate->Charge) >  1.0E-9 && sqrt(candidate->Position.X()*candidate->Position.X() + candidate->Position.Y()*candidate->Position.Y()) < 2)
-      { 
-            nch++;
-            sumpt2 += pt*pt;
-            vx += pt*pt*candidate->Position.X();
-            vy += pt*pt*candidate->Position.Y();
-            vz += pt*pt*(z + dz);
-            vt += pt*pt*(t + dt2);
-            vertex->AddCandidate(candidate);
-      }*/
       if(TMath::Abs(candidate->Charge) >  1.0E-9 && sqrt(candidate->Position.X()*candidate->Position.X() + candidate->Position.Y()*candidate->Position.Y()) < 2)
       {
         if( fabs(z+dz - ((Candidate *)fVertexOutputArray->At(0))->Position.Z()) < dzPileUp && fabs(t+dt2 - ((Candidate *)fVertexOutputArray->At(0))->Position.T()) < 1.0E3 * c_light * dtPileUp) {
@@ -518,8 +479,8 @@ TLorentzVector PileUpMerger::Propagate(Candidate *_particle, int det)
       thefRadius = fRadius;
       thefHalfLength = fHalfLength;
   } else {  
-      thefRadius = 1.29;
-      thefHalfLength = 3.14;
+      thefRadius = fRadiusECAL;
+      thefHalfLength = fHalfLengthECAL;
   }
 
   if(TMath::Hypot(x, y) > thefRadius || TMath::Abs(z) > thefHalfLength)

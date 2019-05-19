@@ -172,11 +172,13 @@ public:
   Float_t YOuter; // track position (y component) at the tracker edge
   Float_t ZOuter; // track position (z component) at the tracker edge
   
- Float_t TMTD; // track position (t component) at the tracker edge
+  Float_t ErrorTMTD; // track position (t component) at the tracker edge
+  Float_t TMTD; // track position (t component) at the tracker edge
   Float_t XMTD; // track position (x component) at the tracker edge
   Float_t YMTD; // track position (y component) at the tracker edge
   Float_t ZMTD; // track position (z component) at the tracker edge
   
+  Float_t ErrorTECAL; // track position (t component) at the tracker edge
   Float_t TECAL; // track position (t component) at the tracker edge
   Float_t XECAL; // track position (x component) at the tracker edge
   Float_t YECAL; // track position (y component) at the tracker edge
@@ -292,11 +294,13 @@ public:
   Float_t ZOuter; //particle arrival time of flight
   Float_t TOuter; //particle arrival time of flight
 
-Float_t TMTD; // track position (t component) at the tracker edge
+  Float_t ErrorTMTD; // track position (t component) at the tracker edge
+  Float_t TMTD; // track position (t component) at the tracker edge
   Float_t XMTD; // track position (x component) at the tracker edge
   Float_t YMTD; // track position (y component) at the tracker edge
   Float_t ZMTD; // track position (z component) at the tracker edge
   
+  Float_t ErrorTECAL; // track position (t component) at the tracker edge
   Float_t TECAL; // track position (t component) at the tracker edge
   Float_t XECAL; // track position (x component) at the tracker edge
   Float_t YECAL; // track position (y component) at the tracker edge
@@ -344,11 +348,14 @@ public:
   Float_t YOuter; //particle arrival time of flight
   Float_t ZOuter; //particle arrival time of flight
   Float_t TOuter; //particle arrival time of flight
-Float_t TMTD; // track position (t component) at the tracker edge
+  
+  Float_t ErrorTMTD; // track position (t component) at the tracker edge
+  Float_t TMTD; // track position (t component) at the tracker edge
   Float_t XMTD; // track position (x component) at the tracker edge
   Float_t YMTD; // track position (y component) at the tracker edge
   Float_t ZMTD; // track position (z component) at the tracker edge
   
+  Float_t ErrorTECAL; // track position (t component) at the tracker edge
   Float_t TECAL; // track position (t component) at the tracker edge
   Float_t XECAL; // track position (x component) at the tracker edge
   Float_t YECAL; // track position (y component) at the tracker edge
@@ -397,11 +404,14 @@ public:
   Float_t YOuter; //particle arrival time of flight
   Float_t ZOuter; //particle arrival time of flight
   Float_t TOuter; //particle arrival time of flight
-Float_t TMTD; // track position (t component) at the tracker edge
+  
+  Float_t ErrorTMTD; // track position (t component) at the tracker edge
+  Float_t TMTD; // track position (t component) at the tracker edge
   Float_t XMTD; // track position (x component) at the tracker edge
   Float_t YMTD; // track position (y component) at the tracker edge
   Float_t ZMTD; // track position (z component) at the tracker edge
   
+  Float_t ErrorTECAL; // track position (t component) at the tracker edge
   Float_t TECAL; // track position (t component) at the tracker edge
   Float_t XECAL; // track position (x component) at the tracker edge
   Float_t YECAL; // track position (y component) at the tracker edge
@@ -447,11 +457,14 @@ public:
   Float_t YOuter; //particle arrival time of flight
   Float_t ZOuter; //particle arrival time of flight
   Float_t TOuter; //particle arrival time of flight
-Float_t TMTD; // track position (t component) at the tracker edge
+  
+  Float_t ErrorTMTD; // track position (t component) at the tracker edge
+  Float_t TMTD; // track position (t component) at the tracker edge
   Float_t XMTD; // track position (x component) at the tracker edge
   Float_t YMTD; // track position (y component) at the tracker edge
   Float_t ZMTD; // track position (z component) at the tracker edge
   
+  Float_t ErrorTECAL; // track position (t component) at the tracker edge
   Float_t TECAL; // track position (t component) at the tracker edge
   Float_t XECAL; // track position (x component) at the tracker edge
   Float_t YECAL; // track position (y component) at the tracker edge
@@ -546,11 +559,13 @@ public:
   Float_t YOuter; // track position (y component) at the tracker edge
   Float_t ZOuter; // track position (z component) at the tracker edge
 
+  Float_t ErrorTMTD; // track position (t component) at the tracker edge
   Float_t TMTD; // track position (t component) at the tracker edge
   Float_t XMTD; // track position (x component) at the tracker edge
   Float_t YMTD; // track position (y component) at the tracker edge
   Float_t ZMTD; // track position (z component) at the tracker edge
   
+  Float_t ErrorTECAL; // track position (t component) at the tracker edge
   Float_t TECAL; // track position (t component) at the tracker edge
   Float_t XECAL; // track position (x component) at the tracker edge
   Float_t YECAL; // track position (y component) at the tracker edge
@@ -685,6 +700,8 @@ public:
 
   Float_t L; // path length
   Float_t ErrorT; // path length
+  Float_t ErrorTMTD; // path length
+  Float_t ErrorTECAL; // path length
   Float_t D0;
   Float_t ErrorD0;
   Float_t DZ;

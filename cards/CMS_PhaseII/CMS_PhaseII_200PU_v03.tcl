@@ -146,11 +146,15 @@ module PileUpMerger PileUpMerger {
   set EfficiencyTiming 1.0
   set dtPileUp 90E-12
   set dzPileUp 1.0
- 
+  set fTimeNECAL 6170
+  set fTimeCECAL 17.9
+  
   # radius of the magnetic field coverage, in m
   set Radius 1.25
+  set RadiusECAL 1.29
   # half-length of the magnetic field coverage, in m
   set HalfLength 3.0
+  set HalfLengthECAL 3.14
 
   # magnetic field
   set Bz 3.8

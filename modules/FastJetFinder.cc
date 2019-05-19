@@ -322,7 +322,7 @@ void FastJetFinder::Process()
   TLorentzVector momentum;
 
   Double_t deta, dphi, detaMax, dphiMax;
-  Double_t time, timeWeight;
+  Double_t time, timeWeight, timeECAL, timeMTD, timeErrorECAL, timeErrorMTD;
   Int_t number, ncharged, nneutrals;
   Int_t charge; 
   Double_t rho = 0.0;
@@ -420,6 +420,10 @@ void FastJetFinder::Process()
     candidate = factory->NewCandidate();
 
     time = 0.0;
+    timeMTD = 0.0;
+    timeECAL = 0.0;
+    timeErrorMTD = 0.0;
+    timeErrorECAL = 0.0;
     timeWeight = 0.0;
 
     charge = 0;
@@ -444,6 +448,11 @@ void FastJetFinder::Process()
       else ncharged++;
 
       time += TMath::Sqrt(constituent->Momentum.E())*(constituent->Position.T());
+      timeMTD += TMath::Sqrt(constituent->Momentum.E())*(constituent->PositionMTD.T());
+      timeErrorMTD += constituent->Momentum.E() * constituent->ErrorTMTD * constituent->ErrorTMTD;
+      timeECAL += TMath::Sqrt(constituent->Momentum.E())*(constituent->PositionECAL.T());
+      timeErrorECAL += constituent->Momentum.E() * constituent->ErrorTECAL * constituent->ErrorTECAL;
+      time += TMath::Sqrt(constituent->Momentum.E())*(constituent->Position.T());
       timeWeight += TMath::Sqrt(constituent->Momentum.E());
 
       charge += constituent->Charge;
@@ -453,6 +462,11 @@ void FastJetFinder::Process()
 
     candidate->Momentum = momentum;
     candidate->Position.SetT(time/timeWeight);
+    candidate->PositionMTD.SetT(timeMTD/timeWeight);
+    candidate->ErrorTMTD = sqrt(timeErrorMTD)/timeWeight;
+    candidate->PositionECAL.SetT(timeECAL/timeWeight);
+    candidate->ErrorTECAL = sqrt(timeErrorECAL)/timeWeight;
+
     candidate->Area.SetPxPyPzE(area.px(), area.py(), area.pz(), area.E());
 
     candidate->DeltaEta = detaMax;

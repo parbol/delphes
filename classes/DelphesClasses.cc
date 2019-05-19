@@ -130,6 +130,8 @@ Candidate::Candidate() :
   Position(0.0, 0.0, 0.0, 0.0),
   PositionMTD(0.0, 0.0, 0.0, 0.0),
   PositionECAL(0.0, 0.0, 0.0, 0.0),
+  ErrorTMTD(0),
+  ErrorTECAL(0),
   PositionError(0.0, 0.0, 0.0, 0.0),
   InitialPosition(0.0, 0.0, 0.0, 0.0),
   Area(0.0, 0.0, 0.0, 0.0),
@@ -299,6 +301,8 @@ void Candidate::Copy(TObject &obj) const
   object.Area = Area;
   object.L = L;
   object.ErrorT = ErrorT;
+  object.ErrorTMTD = ErrorTMTD;
+  object.ErrorTECAL = ErrorTECAL;
   object.D0 = D0;
   object.ErrorD0 = ErrorD0;
   object.DZ = DZ;
@@ -425,6 +429,8 @@ void Candidate::Clear(Option_t* option)
   Area.SetXYZT(0.0, 0.0, 0.0, 0.0);
   L = 0.0;
   ErrorT = 0.0;
+  ErrorTMTD = 0.0;
+  ErrorTECAL = 0.0;
   D0 = 0.0;  
   ErrorD0 = 0.0;
   DZ = 0.0;
