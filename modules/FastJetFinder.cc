@@ -323,6 +323,9 @@ void FastJetFinder::Process()
 
   Double_t deta, dphi, detaMax, dphiMax;
   Double_t time, timeWeight, timeECAL, timeMTD, timeErrorECAL, timeErrorMTD;
+  Double_t x, y, z;
+  Double_t xMTD, yMTD, zMTD;
+  Double_t xECAL, yECAL, zECAL;
   Int_t number, ncharged, nneutrals;
   Int_t charge; 
   Double_t rho = 0.0;
@@ -425,6 +428,15 @@ void FastJetFinder::Process()
     timeErrorMTD = 0.0;
     timeErrorECAL = 0.0;
     timeWeight = 0.0;
+    x = 0.0;
+    y = 0.0;
+    z = 0.0;
+    xMTD = 0.0;
+    yMTD = 0.0;
+    zMTD = 0.0;
+    xECAL = 0.0;
+    yECAL = 0.0;
+    zECAL = 0.0;
 
     charge = 0;
 
@@ -444,28 +456,53 @@ void FastJetFinder::Process()
       if(deta > detaMax) detaMax = deta;
       if(dphi > dphiMax) dphiMax = dphi;
 
-      if(constituent->Charge == 0) nneutrals++;
-      else ncharged++;
+      if(constituent->Charge == 0) {
+          nneutrals++;
+      } else {
+          ncharged++;
 
-      time += TMath::Sqrt(constituent->Momentum.E())*(constituent->Position.T());
-      timeMTD += TMath::Sqrt(constituent->Momentum.E())*(constituent->PositionMTD.T());
-      timeErrorMTD += constituent->Momentum.E() * constituent->ErrorTMTD * constituent->ErrorTMTD;
-      timeECAL += TMath::Sqrt(constituent->Momentum.E())*(constituent->PositionECAL.T());
-      timeErrorECAL += constituent->Momentum.E() * constituent->ErrorTECAL * constituent->ErrorTECAL;
-      time += TMath::Sqrt(constituent->Momentum.E())*(constituent->Position.T());
-      timeWeight += TMath::Sqrt(constituent->Momentum.E());
-
+          time += TMath::Sqrt(constituent->Momentum.E())*(constituent->InitialPosition.T());
+          timeMTD += TMath::Sqrt(constituent->Momentum.E())*(constituent->PositionMTD.T());
+          timeErrorMTD += constituent->Momentum.E() * constituent->ErrorTMTD * constituent->ErrorTMTD;
+          timeECAL += TMath::Sqrt(constituent->Momentum.E())*(constituent->PositionECAL.T());
+          timeErrorECAL += constituent->Momentum.E() * constituent->ErrorTECAL * constituent->ErrorTECAL;
+          time += TMath::Sqrt(constituent->Momentum.E())*(constituent->InitialPosition.T());
+          timeWeight += TMath::Sqrt(constituent->Momentum.E());
+    
+          x += TMath::Sqrt(constituent->Momentum.E())*(constituent->InitialPosition.X());
+          xMTD += TMath::Sqrt(constituent->Momentum.E())*(constituent->PositionMTD.X());
+          xECAL += TMath::Sqrt(constituent->Momentum.E())*(constituent->PositionECAL.X());
+          y += TMath::Sqrt(constituent->Momentum.E())*(constituent->InitialPosition.Y());
+          yMTD += TMath::Sqrt(constituent->Momentum.E())*(constituent->PositionMTD.Y());
+          yECAL += TMath::Sqrt(constituent->Momentum.E())*(constituent->PositionECAL.Y());
+          z += TMath::Sqrt(constituent->Momentum.E())*(constituent->InitialPosition.Z());
+          zMTD += TMath::Sqrt(constituent->Momentum.E())*(constituent->PositionMTD.Z());
+          zECAL += TMath::Sqrt(constituent->Momentum.E())*(constituent->PositionECAL.Z());
+      }
       charge += constituent->Charge;
 
       candidate->AddCandidate(constituent);
     }
 
     candidate->Momentum = momentum;
-    candidate->Position.SetT(time/timeWeight);
+    candidate->InitialPosition.SetT(time/timeWeight);
     candidate->PositionMTD.SetT(timeMTD/timeWeight);
     candidate->ErrorTMTD = sqrt(timeErrorMTD)/timeWeight;
     candidate->PositionECAL.SetT(timeECAL/timeWeight);
     candidate->ErrorTECAL = sqrt(timeErrorECAL)/timeWeight;
+    
+    
+    candidate->InitialPosition.SetX(x/timeWeight);
+    candidate->PositionMTD.SetX(xMTD/timeWeight);
+    candidate->PositionECAL.SetX(xECAL/timeWeight);
+    
+    candidate->InitialPosition.SetY(y/timeWeight);
+    candidate->PositionMTD.SetY(yMTD/timeWeight);
+    candidate->PositionECAL.SetY(yECAL/timeWeight);
+    
+    candidate->InitialPosition.SetZ(z/timeWeight);
+    candidate->PositionMTD.SetZ(zMTD/timeWeight);
+    candidate->PositionECAL.SetZ(zECAL/timeWeight);
 
     candidate->Area.SetPxPyPzE(area.px(), area.py(), area.pz(), area.E());
 
