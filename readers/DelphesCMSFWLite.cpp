@@ -38,6 +38,7 @@
 #include "TDatabasePDG.h"
 #include "TParticlePDG.h"
 #include "TLorentzVector.h"
+#include "TH1F.h"
 
 #include "modules/Delphes.h"
 #include "classes/DelphesStream.h"
@@ -316,6 +317,7 @@ int main(int argc, char *argv[])
   stringstream message;
   TFile *inputFile = 0;
   TFile *outputFile = 0;
+  TH1F *nEvents = 0;
   TStopwatch eventStopWatch;
   ExRootTreeWriter *treeWriter = 0;
   ExRootTreeBranch *branchEvent = 0, *branchWeight = 0;
@@ -361,6 +363,8 @@ int main(int argc, char *argv[])
   {
     outputFile = TFile::Open(argv[2], "CREATE");
 
+    nEvents = new TH1F("nEvents", "", 1, 0, 10000);
+
     if(outputFile == NULL)
     {
       message << "can't open " << argv[2] << endl;
@@ -401,6 +405,7 @@ int main(int argc, char *argv[])
       fwlite::Event event(inputFile);
 
       numberOfEvents = event.size();
+      nEvents->SetBinContent(1, numberOfEvents);
 
       if(numberOfEvents <= 0) continue;
 
@@ -440,12 +445,14 @@ int main(int argc, char *argv[])
 
     modularDelphes->FinishTask();
     treeWriter->Write();
+    nEvents->Write();
 
     cout << "** Exiting..." << endl;
 
     delete modularDelphes;
     delete confReader;
     delete treeWriter;
+    delete nEvents;
     delete outputFile;
 
     return 0;
