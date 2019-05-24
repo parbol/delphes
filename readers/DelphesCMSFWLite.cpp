@@ -328,7 +328,7 @@ int main(int argc, char *argv[])
   Int_t i;
   Long64_t eventCounter, numberOfEvents;
   Bool_t firstEvent = kTRUE;
-
+  int realNumberOfEvents = 0;
   if(argc < 6)
   {
     cout << " Usage: " << appName << " config_file" << " output_file" << " from_event to_event input_file(s)" << endl;
@@ -362,8 +362,6 @@ int main(int argc, char *argv[])
   try
   {
     outputFile = TFile::Open(argv[2], "CREATE");
-
-    nEvents = new TH1F("nEvents", "", 1, 0, 10000);
 
     if(outputFile == NULL)
     {
@@ -405,7 +403,6 @@ int main(int argc, char *argv[])
       fwlite::Event event(inputFile);
 
       numberOfEvents = event.size();
-      nEvents->SetBinContent(1, numberOfEvents);
 
       if(numberOfEvents <= 0) continue;
 
@@ -434,7 +431,8 @@ int main(int argc, char *argv[])
         modularDelphes->Clear();
         treeWriter->Clear();
         progressBar.Update(eventCounter, eventCounter);
-        ++eventCounter;
+        ++eventCounter; 
+        ++realNumberOfEvents;
       }
 
       progressBar.Update(eventCounter, eventCounter, kTRUE);
@@ -445,15 +443,19 @@ int main(int argc, char *argv[])
 
     modularDelphes->FinishTask();
     treeWriter->Write();
-    nEvents->Write();
 
     cout << "** Exiting..." << endl;
 
     delete modularDelphes;
     delete confReader;
     delete treeWriter;
-    delete nEvents;
     delete outputFile;
+    
+    TH1F * nEvents = new TH1F("nEvents", "", 1, 0, 10000);
+    nEvents->SetBinContent(1, realNumberOfEvents);
+    TFile outputFile2(argv[2], "UPDATE");
+    nEvents->Write();
+    outputFile2.Close();
 
     return 0;
   }
