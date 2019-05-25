@@ -168,6 +168,7 @@ def prepareJobs(exeName, inputPath, fileName, numberOfEvents, outputDirectory, l
             chunkCounter = chunkCounter + 1
         else:
             prepareJobCondor(exeName, inputfilename, initevent, endevent, outputfilename, 'none', 'none', jobname, cardLocation, cmsswrelease, launcher, queue, site, tag)
+            chunkCounter = chunkCounter + 1
      
     if site == 'condor': 
         prepareJobCondorSubmitter(exeName, inputfilename, initevent, endevent, outputfilename, 'none', 'none', jobname, cardLocation, cmsswrelease, launcher, queue, site, logLocation, nameTemplate, tag)
