@@ -606,7 +606,8 @@ module HighMassVertexRecover HighMassVertexRecover {
 module PileUpSubtractor4D PileUpSubtractor4D {
 # add InputArray InputArray OutputArray
 
-  add InputArray TimeSmearingMIP/tracks tracks
+  #add InputArray TimeSmearingMIP/tracks tracks
+  add InputArray HighMassVertexRecover/tracks tracks
   add InputArray TimeSmearingPhotons/photons photons
   add InputArray TimeSmearingNH/neutralhadrons neutralhadrons
   add InputArray TimeSmearingEcal/towers towers
