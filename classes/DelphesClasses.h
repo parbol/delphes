@@ -571,6 +571,8 @@ public:
 
   Float_t DeDx; // track charged energy loss in MeV/cm
 
+  Int_t IsRecoPU; // flags if particles is PU or not
+
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
 

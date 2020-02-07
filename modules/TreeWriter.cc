@@ -532,6 +532,7 @@ void TreeWriter::ProcessParticleFlowCandidates(ExRootTreeBranch *branch, TObjArr
     entry->T = initialPosition.T() * 1.0E-3 / c_light;
 
     entry->VertexIndex = candidate->ClusterIndex;
+    entry->IsRecoPU = candidate->IsRecoPU;
 
     entry->Eem = candidate->Eem;
     entry->Ehad = candidate->Ehad;
