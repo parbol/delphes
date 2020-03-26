@@ -127,7 +127,8 @@ void TimeSmearing::Process()
     // since the correct value will be computed after Vertexing4D
     if(candidate->Charge != 0)
       // Dummy Value, correct value will be computed by VertexFinderDA4D
-      candidate->InitialPosition.SetT((100+ti)*1.0E3*c_light);
+      //candidate->InitialPosition.SetT((100+ti)*1.0E3*c_light);
+      candidate->InitialPosition.SetT(ti_smeared*1.0E3*c_light);
     else
       candidate->InitialPosition.SetT(ti_smeared*1.0E3*c_light);
 

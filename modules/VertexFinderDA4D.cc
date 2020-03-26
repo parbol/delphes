@@ -515,6 +515,7 @@ void VertexFinderDA4D::fill(tracks_t &tks)
     double p = pt * sqrt(1 + candidate->CtgTheta*candidate->CtgTheta);
     double e = sqrt(p*p + M*M);
 
+    //Original version
     double t = candidate->Position.T()*1.E9/c_light; // from [mm] to [ps]
     if(t <= -9999) discard = 1;                    // Means that the time information has not been added
 
@@ -524,6 +525,9 @@ void VertexFinderDA4D::fill(tracks_t &tks)
 
     // Use full path Length
     t -= candidate->L*1E9/(c_light*p/e);
+
+    //If we want to use the smeared time at vertex
+    t = candidate->InitialPosition.T()*1.E9/c_light;
 
     candidate->Td = t*1E-9*c_light;
     if(fabs(t) > 3*fDtCutOff) discard = 1;

@@ -403,6 +403,7 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/PhotonConversions.h \
 	modules/ParticlePropagator.h \
 	modules/Efficiency.h \
+	modules/EnergyLoss.h \
 	modules/IdentificationMap.h \
 	modules/EnergySmearing.h \
 	modules/MomentumSmearing.h \
@@ -427,9 +428,9 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/PileUpMerger.h \
 	modules/JetPileUpSubtractor.h \
 	modules/TrackPileUpSubtractor.h \
-	modules/TrackTimingPileUpSubtractor.h \
 	modules/TaggingParticlesSkimmer.h \
 	modules/PileUpJetID.h \
+	modules/PileUpSubtractor4D.h \
 	modules/PhotonID.h \
 	modules/ConstituentFilter.h \
 	modules/StatusPidFilter.h \
@@ -744,6 +745,15 @@ tmp/modules/Efficiency.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootClassifier.h \
 	external/ExRootAnalysis/ExRootFilter.h \
 	external/ExRootAnalysis/ExRootResult.h
+tmp/modules/EnergyLoss.$(ObjSuf): \
+	modules/EnergyLoss.$(SrcSuf) \
+	modules/EnergyLoss.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesFormula.h \
+	external/ExRootAnalysis/ExRootClassifier.h \
+	external/ExRootAnalysis/ExRootFilter.h \
+	external/ExRootAnalysis/ExRootResult.h
 tmp/modules/EnergyScale.$(ObjSuf): \
 	modules/EnergyScale.$(SrcSuf) \
 	modules/EnergyScale.h \
@@ -947,6 +957,15 @@ tmp/modules/PileUpMergerPythia8.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootClassifier.h \
 	external/ExRootAnalysis/ExRootFilter.h \
 	external/ExRootAnalysis/ExRootResult.h
+tmp/modules/PileUpSubtractor4D.$(ObjSuf): \
+	modules/PileUpSubtractor4D.$(SrcSuf) \
+	modules/PileUpSubtractor4D.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesFormula.h \
+	external/ExRootAnalysis/ExRootClassifier.h \
+	external/ExRootAnalysis/ExRootFilter.h \
+	external/ExRootAnalysis/ExRootResult.h
 tmp/modules/RecoPuFilter.$(ObjSuf): \
 	modules/RecoPuFilter.$(SrcSuf) \
 	modules/RecoPuFilter.h \
@@ -1026,15 +1045,6 @@ tmp/modules/TrackPileUpSubtractor.$(ObjSuf): \
 tmp/modules/TrackSmearing.$(ObjSuf): \
 	modules/TrackSmearing.$(SrcSuf) \
 	modules/TrackSmearing.h \
-	classes/DelphesClasses.h \
-	classes/DelphesFactory.h \
-	classes/DelphesFormula.h \
-	external/ExRootAnalysis/ExRootClassifier.h \
-	external/ExRootAnalysis/ExRootFilter.h \
-	external/ExRootAnalysis/ExRootResult.h
-tmp/modules/TrackTimingPileUpSubtractor.$(ObjSuf): \
-	modules/TrackTimingPileUpSubtractor.$(SrcSuf) \
-	modules/TrackTimingPileUpSubtractor.h \
 	classes/DelphesClasses.h \
 	classes/DelphesFactory.h \
 	classes/DelphesFormula.h \
@@ -1161,6 +1171,7 @@ DELPHES_OBJ +=  \
 	tmp/modules/DenseTrackFilter.$(ObjSuf) \
 	tmp/modules/DualReadoutCalorimeter.$(ObjSuf) \
 	tmp/modules/Efficiency.$(ObjSuf) \
+	tmp/modules/EnergyLoss.$(ObjSuf) \
 	tmp/modules/EnergyScale.$(ObjSuf) \
 	tmp/modules/EnergySmearing.$(ObjSuf) \
 	tmp/modules/ExampleModule.$(ObjSuf) \
@@ -1182,6 +1193,7 @@ DELPHES_OBJ +=  \
 	tmp/modules/PhotonID.$(ObjSuf) \
 	tmp/modules/PileUpJetID.$(ObjSuf) \
 	tmp/modules/PileUpMerger.$(ObjSuf) \
+	tmp/modules/PileUpSubtractor4D.$(ObjSuf) \
 	tmp/modules/RecoPuFilter.$(ObjSuf) \
 	tmp/modules/SimpleCalorimeter.$(ObjSuf) \
 	tmp/modules/StatusPidFilter.$(ObjSuf) \
@@ -1192,7 +1204,6 @@ DELPHES_OBJ +=  \
 	tmp/modules/TrackCountingTauTagging.$(ObjSuf) \
 	tmp/modules/TrackPileUpSubtractor.$(ObjSuf) \
 	tmp/modules/TrackSmearing.$(ObjSuf) \
-	tmp/modules/TrackTimingPileUpSubtractor.$(ObjSuf) \
 	tmp/modules/TreeWriter.$(ObjSuf) \
 	tmp/modules/UniqueObjectFinder.$(ObjSuf) \
 	tmp/modules/VertexFinder.$(ObjSuf) \
@@ -1893,6 +1904,10 @@ modules/Calorimeter.h: \
 	classes/DelphesModule.h
 	@touch $@
 
+modules/PileUpSubtractor4D.h: \
+	classes/DelphesModule.h
+	@touch $@
+
 classes/DelphesModule.h: \
 	external/ExRootAnalysis/ExRootTask.h
 	@touch $@
@@ -2053,6 +2068,10 @@ modules/Cloner.h: \
 	classes/DelphesModule.h
 	@touch $@
 
+modules/EnergyLoss.h: \
+	classes/DelphesModule.h
+	@touch $@
+
 external/fastjet/PseudoJet.hh: \
 	external/fastjet/internal/numconsts.hh \
 	external/fastjet/internal/IsBase.hh \
@@ -2111,10 +2130,6 @@ external/fastjet/internal/Dnn4piCylinder.hh: \
 	@touch $@
 
 modules/VertexSorter.h: \
-	classes/DelphesModule.h
-	@touch $@
-
-modules/TrackTimingPileUpSubtractor.h: \
 	classes/DelphesModule.h
 	@touch $@
 

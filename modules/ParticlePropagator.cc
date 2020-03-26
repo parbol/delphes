@@ -157,6 +157,7 @@ void ParticlePropagator::Process()
       particle = static_cast<Candidate *>(candidate->GetCandidates()->At(0));
     }
 
+
     particlePosition = particle->Position;
     particleMomentum = particle->Momentum;
     x = particlePosition.X() * 1.0E-3;

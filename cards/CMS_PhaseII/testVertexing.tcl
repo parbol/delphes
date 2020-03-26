@@ -61,13 +61,13 @@ module PileUpMerger PileUpMerger {
   set VertexOutputArray vertices
 
   # pre-generated minbias input file
-  set PileUpFile MinBias.pileup
+  set PileUpFile /afs/cern.ch/work/p/pablom/private/DelphesOlmo/delphes/samples/MinBias_100k.pileup
 
   # average expected pile up
-  set MeanPileUp 50
+  set MeanPileUp 200
 
   # 0-poisson, 1-uniform, 2-delta
-  set PileUpDistribution 2
+  set PileUpDistribution 0
 
   # maximum spread in the beam direction in m
   set ZVertexSpread 0.25
@@ -197,7 +197,7 @@ module TrackSmearing TrackSmearing {
   set ApplyToPileUp true
 
   # from http://mersi.web.cern.ch/mersi/layouts/.private/Baseline_tilted_200_Pixel_1_1_1/index.html
-  source trackResolution.tcl
+  source trackResolutionCMS.tcl
 }
 
 ########################################
